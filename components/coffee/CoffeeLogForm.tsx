@@ -1,9 +1,8 @@
 'use client';
 
 import { useMachine } from '@xstate/react';
-import { coffeeLogMachine, CoffeeLogContext } from '@/machines/coffeeLogMachine';
+import { setup, assign } from '@xstate/form';
 import { useState } from 'react';
-import { assign } from 'xstate';
 
 const roastLevels = ['Light', 'Medium-Light', 'Medium', 'Medium-Dark', 'Dark'];
 const brewingMethods = ['Pour Over', 'French Press', 'Espresso', 'AeroPress', 'Cold Brew'];
@@ -17,24 +16,89 @@ const tastingNoteCategories = {
   'Other': ['Earthy', 'Smoky', 'Woody', 'Herbal'],
 };
 
-export const CoffeeLogForm = () => {
-  const [state, send] = useMachine(coffeeLogMachine, {
-    actions: {
-      updateContext: assign({
-        data: (context, event: { type: string; data?: Partial<CoffeeLogContext> }) => ({
-          ...context,
-          ...(event?.data || {}),
-        }),
-      }),
-    },
-    services: {
-      submitLog: async (context) => {
-        // API call would go here
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        console.log('Submitted:', context);
+interface CoffeeLogContext {
+  beanOrigin?: string;
+  roastLevel?: string;
+  brewingMethod?: string;
+  grindSize?: string;
+  waterTemperature?: number;
+  ratio?: string;
+  tastingNotes?: string[];
+  rating?: number;
+}
+
+export const coffeeLogMachine = setup({
+  types: {
+    context: {} as CoffeeLogContext,
+    events: {} as { type: 'UPDATE'; data: Partial<CoffeeLogContext> },
+  },
+  actions: {
+    updateContext: assign((context, event) => ({
+      ...context,
+      ...event.data,
+    })),
+  },
+}).createMachine({
+  id: 'coffeeLog',
+  initial: 'beanInfo',
+  context: {},
+  states: {
+    beanInfo: {
+      on: {
+        NEXT: 'brewingInfo',
       },
     },
-  });
+    brewingInfo: {
+      on: {
+        NEXT: 'tastingInfo',
+        BACK: 'beanInfo',
+      },
+    },
+    tastingInfo: {
+      on: {
+        NEXT: 'review',
+        BACK: 'brewingInfo',
+      },
+    },
+    review: {
+      on: {
+        NEXT: 'submitting',
+        BACK: 'tastingInfo',
+      },
+    },
+    submitting: {
+      invoke: {
+        src: 'submitLog',
+        onDone: {
+          target: 'success',
+        },
+        onError: {
+          target: 'error',
+        },
+      },
+    },
+    error: {
+      on: {
+        RETRY: 'submitting',
+      },
+    },
+    success: {
+      on: {
+        NEW: 'beanInfo',
+      },
+    },
+  },
+  services: {
+    submitLog: async (context) => {
+      // API call would go here
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      console.log('Submitted:', context);
+    },
+  },
+});
+
+export const CoffeeLogForm = () => {
+  const [state, send] = useMachine(coffeeLogMachine);
 
   const [formData, setFormData] = useState<CoffeeLogContext>({});
 
