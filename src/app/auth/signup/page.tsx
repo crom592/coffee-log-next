@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
@@ -86,12 +87,24 @@ export default function SignUp() {
 
         <div className="auth-providers">
           <button className="auth-provider-button google">
-            <img src="/images/google.svg" alt="Google" />
+            <Image
+              src="/images/google.svg"
+              alt="Google Logo"
+              width={24}
+              height={24}
+              className="w-6 h-6"
+            />
             Google로 계속하기
           </button>
           
           <button className="auth-provider-button kakao">
-            <img src="/images/kakao.svg" alt="Kakao" />
+            <Image
+              src="/images/kakao.svg"
+              alt="Kakao Logo"
+              width={24}
+              height={24}
+              className="w-6 h-6"
+            />
             카카오로 계속하기
           </button>
         </div>
