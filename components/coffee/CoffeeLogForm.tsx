@@ -238,7 +238,7 @@ export const CoffeeLogForm = () => {
                     key={rating}
                     onClick={() => handleUpdate({ rating })}
                     className={`p-2 rounded-full ${
-                      formData.rating >= rating
+                      (formData.rating || 0) >= rating
                         ? 'text-yellow-500'
                         : 'text-gray-500'
                     }`}
