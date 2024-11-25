@@ -80,7 +80,7 @@ export const LoginForm = () => {
         <div className="bg-red-900 text-red-100 p-3 rounded-lg text-sm" role="alert">
           {state.context.error}
           <button
-            onClick={() => send({ type: 'RETRY', retry: true })}
+            onClick={() => send({ type: 'RETRY' })}
             className="ml-2 underline hover:text-red-200"
           >
             Try Again
