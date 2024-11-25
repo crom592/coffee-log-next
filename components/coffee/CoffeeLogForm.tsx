@@ -3,6 +3,7 @@
 import { useMachine } from '@xstate/react';
 import { coffeeLogMachine, CoffeeLogContext } from '@/machines/coffeeLogMachine';
 import { useState } from 'react';
+import { assign } from 'xstate';
 
 const roastLevels = ['Light', 'Medium-Light', 'Medium', 'Medium-Dark', 'Dark'];
 const brewingMethods = ['Pour Over', 'French Press', 'Espresso', 'AeroPress', 'Cold Brew'];
@@ -18,13 +19,11 @@ const tastingNoteCategories = {
 
 export const CoffeeLogForm = () => {
   const [state, send] = useMachine(coffeeLogMachine, {
-    config: {
-      actions: {
-        updateContext: (context, event) => ({
-          ...context,
-          ...event.data,
-        }),
-      },
+    actions: {
+      updateContext: assign((context, event) => ({
+        ...context,
+        ...event.data,
+      })),
     },
     services: {
       submitLog: async (context) => {
