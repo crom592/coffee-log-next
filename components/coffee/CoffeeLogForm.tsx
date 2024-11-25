@@ -1,7 +1,7 @@
 'use client';
 
 import { useMachine } from '@xstate/react';
-import { setup, assign } from '@xstate/form';
+import { setup, assign } from 'xstate';
 import { useState } from 'react';
 
 const roastLevels = ['Light', 'Medium-Light', 'Medium', 'Medium-Dark', 'Dark'];
