@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .log-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: var(--spacing-loose);
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-tight);
+        color: var(--primary);
+        text-decoration: none;
+        padding: var(--spacing-tight);
+        margin: calc(var(--spacing-tight) * -1);
+        border-radius: var(--radius-base);
+        transition: all 0.2s;
+    }
+
+    .back-link:hover {
+        background-color: var(--surface);
+    }
+
+    .log-card {
+        background-color: var(--background);
+        border-radius: var(--radius-large);
+        box-shadow: var(--shadow-base);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .log-header {
+        padding: var(--spacing-loose);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .log-title {
+        font-size: 1.875rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: var(--spacing-base);
+    }
+
+    .log-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--text-subdued);
+        font-size: 0.875rem;
+    }
+
+    .log-section {
+        padding: var(--spacing-loose);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .log-section:last-child {
+        border-bottom: none;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: var(--spacing-base);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-base);
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-tight);
+    }
+
+    .info-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-subdued);
+    }
+
+    .info-value {
+        color: var(--text);
+    }
+
+    .text-content {
+        color: var(--text);
+        white-space: pre-wrap;
+        line-height: 1.6;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: var(--spacing-base);
+    }
+
+    .share-button {
+        padding: var(--spacing-tight) var(--spacing-base);
+        border-radius: var(--radius-base);
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: opacity 0.2s;
+    }
+
+    .share-button.public {
+        background-color: var(--text-subdued);
+        color: var(--background);
+    }
+
+    .share-button.private {
+        background-color: var(--success);
+        color: var(--background);
+    }
+
+    .share-button:hover {
+        opacity: 0.9;
+    }
+
+    .edit-button {
+        color: var(--primary);
+    }
+
+    .delete-button {
+        color: var(--error);
+    }
+
+    @media (max-width: 768px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-buttons > * {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="log-container">
+    <div class="mb-8 flex justify-between items-center">
+        <a href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('landing') }}" 
+           class="back-link">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            돌아가기
+        </a>
+        
+        {% if current_user.is_authenticated and current_user.id == log.user_id %}
+        <div class="action-buttons">
+            <form method="POST" action="{{ url_for('share_coffee_log', log_id=log.id) if not log.is_public else url_for('unshare_coffee_log', log_id=log.id) }}"
+                  class="inline">
+                <button type="submit" 
+                        class="share-button {% if log.is_public %}public{% else %}private{% endif %}">
+                    {% if log.is_public %}
+                    비공개로 전환
+                    {% else %}
+                    공개로 전환
+                    {% endif %}
+                </button>
+            </form>
+            <a href="{{ url_for('edit_log', log_id=log.id) }}" 
+               class="edit-button share-button">
+                수정하기
+            </a>
+            <form action="{{ url_for('delete_log', log_id=log.id) }}" 
+                  method="POST" 
+                  class="inline"
+                  onsubmit="return confirm('정말로 이 로그를 삭제하시겠습니까?');">
+                <button type="submit" class="delete-button share-button">
+                    삭제하기
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <article class="log-card">
+        <header class="log-header">
+            <h1 class="log-title">{{ log.coffee_name }}</h1>
+            <div class="log-meta">
+                <div class="flex items-center gap-2">
+                    <span>{{ log.user.username }}</span>
+                    <span>•</span>
+                    <time datetime="{{ log.created_at.isoformat() }}">
+                        {{ log.created_at.strftime('%Y년 %m월 %d일 %H:%M') }}
+                    </time>
+                </div>
+                {% if log.is_public %}
+                <span class="text-success">공개</span>
+                {% else %}
+                <span class="text-error">비공개</span>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- 원두 정보 -->
+        <section class="log-section">
+            <h2 class="section-title">원두 정보</h2>
+            <div class="info-grid">
+                {% if log.roaster %}
+                <div class="info-item">
+                    <span class="info-label">로스터리</span>
+                    <span class="info-value">{{ log.roaster }}</span>
+                </div>
+                {% endif %}
+                {% if log.country %}
+                <div class="info-item">
+                    <span class="info-label">원산지</span>
+                    <span class="info-value">{{ log.country }}</span>
+                </div>
+                {% endif %}
+                {% if log.region %}
+                <div class="info-item">
+                    <span class="info-label">지역</span>
+                    <span class="info-value">{{ log.region }}</span>
+                </div>
+                {% endif %}
+                {% if log.farm %}
+                <div class="info-item">
+                    <span class="info-label">농장</span>
+                    <span class="info-value">{{ log.farm }}</span>
+                </div>
+                {% endif %}
+                {% if log.altitude %}
+                <div class="info-item">
+                    <span class="info-label">고도</span>
+                    <span class="info-value">{{ log.altitude }}</span>
+                </div>
+                {% endif %}
+                {% if log.processing %}
+                <div class="info-item">
+                    <span class="info-label">프로세싱</span>
+                    <span class="info-value">{{ log.processing }}</span>
+                </div>
+                {% endif %}
+                {% if log.roast_level %}
+                <div class="info-item">
+                    <span class="info-label">로스팅 포인트</span>
+                    <span class="info-value">{{ log.roast_level }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% if log.cup_notes %}
+            <div class="mt-6">
+                <span class="info-label">컵 노트</span>
+                <p class="text-content mt-2">{{ log.cup_notes }}</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- 추출 정보 -->
+        <section class="log-section">
+            <h2 class="section-title">추출 정보</h2>
+            <div class="info-grid">
+                {% if log.water_type %}
+                <div class="info-item">
+                    <span class="info-label">물 종류</span>
+                    <span class="info-value">{{ log.water_type }}</span>
+                </div>
+                {% endif %}
+                {% if log.dose %}
+                <div class="info-item">
+                    <span class="info-label">도징 (g)</span>
+                    <span class="info-value">{{ log.dose }}g</span>
+                </div>
+                {% endif %}
+                {% if log.water_amount %}
+                <div class="info-item">
+                    <span class="info-label">물 양 (ml)</span>
+                    <span class="info-value">{{ log.water_amount }}ml</span>
+                </div>
+                {% endif %}
+                {% if log.ratio %}
+                <div class="info-item">
+                    <span class="info-label">비율</span>
+                    <span class="info-value">{{ log.ratio }}</span>
+                </div>
+                {% endif %}
+                {% if log.grinder %}
+                <div class="info-item">
+                    <span class="info-label">그라인더</span>
+                    <span class="info-value">{{ log.grinder }}</span>
+                </div>
+                {% endif %}
+                {% if log.grind_size %}
+                <div class="info-item">
+                    <span class="info-label">분쇄도</span>
+                    <span class="info-value">{{ log.grind_size }}</span>
+                </div>
+                {% endif %}
+                {% if log.water_temp %}
+                <div class="info-item">
+                    <span class="info-label">물 온도</span>
+                    <span class="info-value">{{ log.water_temp }}℃</span>
+                </div>
+                {% endif %}
+                {% if log.dripper %}
+                <div class="info-item">
+                    <span class="info-label">드리퍼</span>
+                    <span class="info-value">{{ log.dripper }}</span>
+                </div>
+                {% endif %}
+                {% if log.filter_type %}
+                <div class="info-item">
+                    <span class="info-label">필터</span>
+                    <span class="info-value">{{ log.filter_type }}</span>
+                </div>
+                {% endif %}
+                {% if log.brew_time %}
+                <div class="info-item">
+                    <span class="info-label">추출 시간</span>
+                    <span class="info-value">{{ log.brew_time }}</span>
+                </div>
+                {% endif %}
+                {% if log.tds %}
+                <div class="info-item">
+                    <span class="info-label">TDS</span>
+                    <span class="info-value">{{ log.tds }}%</span>
+                </div>
+                {% endif %}
+                {% if log.extraction_yield %}
+                <div class="info-item">
+                    <span class="info-label">추출 수율</span>
+                    <span class="info-value">{{ log.extraction_yield }}%</span>
+                </div>
+                {% endif %}
+            </div>
+            {% if log.recipe %}
+            <div class="mt-6">
+                <span class="info-label">레시피</span>
+                <p class="text-content mt-2">{{ log.recipe }}</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- 노트 -->
+        <section class="log-section">
+            <h2 class="section-title">노트</h2>
+            {% if log.brew_notes %}
+            <div class="mb-6">
+                <span class="info-label">추출 노트</span>
+                <p class="text-content mt-2">{{ log.brew_notes }}</p>
+            </div>
+            {% endif %}
+            {% if log.improvements %}
+            <div>
+                <span class="info-label">개선점</span>
+                <p class="text-content mt-2">{{ log.improvements }}</p>
+            </div>
+            {% endif %}
+        </section>
+    </article>
+</div>
+{% endblock %}

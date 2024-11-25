@@ -1,0 +1,145 @@
+:root {
+  --primary: #008060;
+  --primary-hover: #006e52;
+  --surface: #f6f6f7;
+  --text: #202223;
+  --text-subdued: #6d7175;
+  --border: #8c9196;
+  --background: #ffffff;
+  --error: #d82c0d;
+  --success: #108043;
+  --max-width: 1200px;
+  --spacing-none: 0;
+  --spacing-extra-tight: 0.25rem;
+  --spacing-tight: 0.5rem;
+  --spacing-base: 1rem;
+  --spacing-loose: 1.5rem;
+  --spacing-extra-loose: 2rem;
+  --radius-base: 0.375rem;
+  --radius-large: 0.5rem;
+  --shadow-base: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Reset & Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--surface);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* Layout */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-base);
+}
+
+/* Navigation */
+.nav {
+  background-color: var(--background);
+  box-shadow: var(--shadow-base);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-base);
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.nav-brand {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+/* Cards */
+.card {
+  background-color: var(--background);
+  border-radius: var(--radius-base);
+  box-shadow: var(--shadow-base);
+  padding: var(--spacing-base);
+}
+
+/* Buttons */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-tight) var(--spacing-base);
+  border-radius: var(--radius-base);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.button-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.button-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: var(--spacing-base);
+}
+
+.label {
+  display: block;
+  margin-bottom: var(--spacing-tight);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.input {
+  width: 100%;
+  padding: var(--spacing-tight);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-base);
+  background-color: var(--background);
+  color: var(--text);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(0, 128, 96, 0.1);
+}
+
+/* Flash Messages */
+.flash {
+  padding: var(--spacing-base);
+  border-radius: var(--radius-base);
+  margin-bottom: var(--spacing-base);
+}
+
+.flash-success {
+  background-color: #ebf9eb;
+  color: var(--success);
+}
+
+.flash-error {
+  background-color: #fbeae5;
+  color: var(--error);
+}

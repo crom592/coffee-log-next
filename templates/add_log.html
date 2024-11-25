@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background-color: var(--background);
+        border-radius: var(--radius-large);
+        box-shadow: var(--shadow-base);
+        padding: var(--spacing-loose);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        margin-bottom: var(--spacing-loose);
+    }
+
+    .form-section-title {
+        color: var(--text);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: var(--spacing-base);
+    }
+
+    .form-grid {
+        display: grid;
+        gap: var(--spacing-base);
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    .form-group {
+        display: grid;
+        gap: var(--spacing-tight);
+    }
+
+    .form-label {
+        color: var(--text);
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: var(--spacing-tight);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-base);
+        font-size: 1rem;
+        line-height: 1.5;
+        transition: all 0.2s;
+        background-color: var(--background);
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(0, 128, 96, 0.1);
+    }
+
+    .form-input::placeholder {
+        color: var(--text-subdued);
+    }
+
+    textarea.form-input {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-tight);
+        color: var(--text);
+        font-size: 0.875rem;
+        cursor: pointer;
+    }
+
+    .button-group {
+        display: flex;
+        gap: var(--spacing-base);
+        justify-content: flex-end;
+        margin-top: var(--spacing-extra-loose);
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .button-group {
+            flex-direction: column;
+        }
+        
+        .button-group .button {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 0 auto; padding: var(--spacing-loose);">
+    <h1 style="font-size: 1.5rem; font-weight: 600; color: var(--text); margin-bottom: var(--spacing-extra-loose);">새 커피 로그 작성</h1>
+    
+    <form method="POST">
+        <!-- 원두 정보 섹션 -->
+        <div class="form-section">
+            <h2 class="form-section-title">원두 정보</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="coffee_name">커피명 *</label>
+                    <input type="text" id="coffee_name" name="coffee_name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="country">나라명</label>
+                    <input type="text" id="country" name="country" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="region">지역명</label>
+                    <input type="text" id="region" name="region" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="farm">농장</label>
+                    <input type="text" id="farm" name="farm" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="altitude">고도</label>
+                    <input type="text" id="altitude" name="altitude" class="form-input" placeholder="예: 1500-1800 MASL">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="processing">프로세싱</label>
+                    <input type="text" id="processing" name="processing" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="roaster">로스터리</label>
+                    <input type="text" id="roaster" name="roaster" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="roast_level">로스팅 포인트</label>
+                    <input type="text" id="roast_level" name="roast_level" class="form-input">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label class="form-label" for="cup_notes">컵 노트</label>
+                    <textarea id="cup_notes" name="cup_notes" class="form-input"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- 추출 정보 섹션 -->
+        <div class="form-section">
+            <h2 class="form-section-title">추출 정보</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="water_type">물 종류</label>
+                    <input type="text" id="water_type" name="water_type" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="dose">도징 (g)</label>
+                    <input type="number" id="dose" name="dose" step="0.1" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="water_amount">물 양 (ml)</label>
+                    <input type="number" id="water_amount" name="water_amount" step="0.1" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="ratio">추출 비율</label>
+                    <input type="text" id="ratio" name="ratio" class="form-input" placeholder="예: 1:15">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="grinder">그라인더 종류</label>
+                    <input type="text" id="grinder" name="grinder" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="grind_size">분쇄도</label>
+                    <input type="text" id="grind_size" name="grind_size" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="water_temp">물 온도 (℃)</label>
+                    <input type="number" id="water_temp" name="water_temp" step="0.1" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="dripper">드리퍼</label>
+                    <input type="text" id="dripper" name="dripper" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="filter_type">필터</label>
+                    <input type="text" id="filter_type" name="filter_type" class="form-input">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label class="form-label" for="recipe">레시피</label>
+                    <textarea id="recipe" name="recipe" class="form-input" placeholder="푸어링 패턴과 시간을 자세히 적어주세요"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="brew_time">추출 시간</label>
+                    <input type="text" id="brew_time" name="brew_time" class="form-input" placeholder="예: 2:30">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="tds">TDS</label>
+                    <input type="number" id="tds" name="tds" step="0.01" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="extraction_yield">수율 (%)</label>
+                    <input type="number" id="extraction_yield" name="extraction_yield" step="0.1" class="form-input">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label class="form-label" for="brew_notes">컵 노트</label>
+                    <textarea id="brew_notes" name="brew_notes" class="form-input"></textarea>
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label class="form-label" for="improvements">개선 사항</label>
+                    <textarea id="improvements" name="improvements" class="form-input"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- 평가 섹션 -->
+        <div class="form-section">
+            <h2 class="form-section-title">평가</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="rating">평점 (1-5)</label>
+                    <input type="number" id="rating" name="rating" min="1" max="5" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="is_public" checked>
+                        공개하기
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <a href="{{ url_for('dashboard') }}" class="button button-secondary">
+                취소
+            </a>
+            <button type="submit" class="button">저장하기</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

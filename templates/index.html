@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-loose);">
+        <h1 style="font-size: 1.5rem; color: var(--primary); margin: 0;">나의 커피 로그</h1>
+        <a href="{{ url_for('add_log') }}" class="button" style="text-decoration: none;">
+            새 로그 작성
+        </a>
+    </div>
+
+    {% if logs %}
+    <div class="logs-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--spacing-base);">
+        {% for log in logs %}
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--spacing-base);">
+                <div>
+                    <h3 style="margin: 0 0 var(--spacing-tight) 0; color: var(--text);">{{ log.coffee_name }}</h3>
+                    <p style="margin: 0; color: var(--text-subdued); font-size: 0.875rem;">
+                        {{ log.created_at.strftime('%Y년 %m월 %d일') }}
+                    </p>
+                </div>
+                <span class="rating" style="background: var(--primary); color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem;">
+                    {{ "★" * log.rating }}{{ "☆" * (5 - log.rating) }}
+                </span>
+            </div>
+
+            <div style="margin-bottom: var(--spacing-base);">
+                <div style="display: grid; grid-template-columns: auto 1fr; gap: var(--spacing-tight) var(--spacing-base); margin-bottom: var(--spacing-base);">
+                    <span style="color: var(--text-subdued);">원산지:</span>
+                    <span>{{ log.origin }}</span>
+                    
+                    <span style="color: var(--text-subdued);">로스팅:</span>
+                    <span>{{ log.roast_level }}</span>
+                    
+                    <span style="color: var(--text-subdued);">그라인딩:</span>
+                    <span>{{ log.grind_size }}</span>
+                    
+                    <span style="color: var(--text-subdued);">추출 방법:</span>
+                    <span>{{ log.brew_method }}</span>
+                </div>
+            </div>
+
+            {% if log.notes %}
+            <div style="border-top: 1px solid var(--border); padding-top: var(--spacing-base);">
+                <p style="margin: 0; white-space: pre-wrap;">{{ log.notes }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: var(--spacing-extra-loose);">
+        <div style="color: var(--text-subdued); margin-bottom: var(--spacing-base);">
+            아직 작성된 커피 로그가 없습니다
+        </div>
+        <a href="{{ url_for('add_log') }}" class="button" style="text-decoration: none; display: inline-block;">
+            첫 로그 작성하기
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .dashboard-container {
+        max-width: var(--max-width);
+        margin: 0 auto;
+        padding: var(--spacing-base);
+    }
+
+    @media (max-width: 768px) {
+        .logs-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    :root {
+        --text-subdued: #637381;
+    }
+</style>
+{% endblock %}

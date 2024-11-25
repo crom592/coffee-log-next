@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Coffee Log{% endblock %}</title>
+    <link rel="stylesheet" href="https://unpkg.com/@shopify/polaris@12.0.0/build/esm/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #008060;
+            --primary-hover: #006e52;
+            --surface: #f6f6f7;
+            --text: #202223;
+            --text-subdued: #6d7175;
+            --border: #8c9196;
+            --background: #ffffff;
+            --error: #d82c0d;
+            --success: #108043;
+            --max-width: 1200px;
+            --spacing-none: 0;
+            --spacing-extra-tight: 0.25rem;
+            --spacing-tight: 0.5rem;
+            --spacing-base: 1rem;
+            --spacing-loose: 1.5rem;
+            --spacing-extra-loose: 2rem;
+            --radius-base: 0.375rem;
+            --radius-large: 0.5rem;
+            --shadow-base: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--surface);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* Layout */
+        .container {
+            width: 100%;
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: var(--spacing-base);
+        }
+
+        /* Navigation */
+        .nav {
+            background-color: var(--background);
+            box-shadow: var(--shadow-base);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-base) var(--spacing-loose);
+            max-width: var(--max-width);
+            margin: 0 auto;
+            gap: var(--spacing-base);
+        }
+
+        .nav-brand {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--spacing-base);
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text);
+            text-decoration: none;
+            padding: var(--spacing-tight) var(--spacing-base);
+            border-radius: var(--radius-base);
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background-color: var(--surface);
+            color: var(--primary);
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--background);
+            border-radius: var(--radius-large);
+            box-shadow: var(--shadow-base);
+            padding: var(--spacing-loose);
+            margin-bottom: var(--spacing-base);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Buttons */
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: var(--spacing-tight) var(--spacing-base);
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            gap: var(--spacing-tight);
+            height: 2.5rem;
+        }
+
+        .button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .button-secondary {
+            background-color: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .button-secondary:hover {
+            background-color: var(--background);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: var(--spacing-base);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-tight);
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: var(--spacing-tight);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-base);
+            font-size: 1rem;
+            line-height: 1.5;
+            transition: all 0.2s;
+            background-color: var(--background);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(0, 128, 96, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-subdued);
+        }
+
+        /* Flash Messages */
+        .flash-messages {
+            margin: var(--spacing-base) 0;
+        }
+
+        .flash {
+            padding: var(--spacing-base);
+            border-radius: var(--radius-base);
+            margin-bottom: var(--spacing-tight);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-tight);
+        }
+
+        .flash-success {
+            background-color: #e3f1df;
+            color: var(--success);
+            border: 1px solid rgba(16, 128, 67, 0.1);
+        }
+
+        .flash-error {
+            background-color: #fdf0ef;
+            color: var(--error);
+            border: 1px solid rgba(216, 44, 13, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-content {
+                flex-direction: column;
+                padding: var(--spacing-tight);
+            }
+
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+                gap: var(--spacing-tight);
+            }
+
+            .nav-link {
+                width: 100%;
+                text-align: center;
+                padding: var(--spacing-tight);
+            }
+
+            .container {
+                padding: var(--spacing-tight);
+            }
+
+            .card {
+                padding: var(--spacing-base);
+            }
+
+            .button {
+                width: 100%;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: var(--spacing-base);
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .container {
+                padding: var(--spacing-loose);
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-content">
+            <a href="{{ url_for('landing') }}" class="nav-brand">Coffee Log</a>
+            <div class="nav-links">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('dashboard') }}" class="nav-link">대시보드</a>
+                    <a href="{{ url_for('community') }}" class="nav-link">커뮤니티</a>
+                    <a href="{{ url_for('logout') }}" class="nav-link">로그아웃</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="nav-link">로그인</a>
+                    <a href="{{ url_for('register') }}" class="nav-link">회원가입</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

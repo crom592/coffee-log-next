@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 400px; margin: 0 auto; padding: var(--spacing-extra-loose) var(--spacing-base);">
+    <div class="card">
+        <h1 style="font-size: 1.5rem; margin-bottom: var(--spacing-loose); color: var(--primary); text-align: center;">로그인</h1>
+        
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label class="form-label" for="username">사용자 이름</label>
+                <input type="text" class="form-input" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="password">비밀번호</label>
+                <input type="password" class="form-input" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="button" style="width: 100%; margin-top: var(--spacing-base);">
+                로그인
+            </button>
+        </form>
+        
+        <div style="text-align: center; margin-top: var(--spacing-loose);">
+            <p style="color: var(--text);">
+                계정이 없으신가요? 
+                <a href="{{ url_for('register') }}" style="color: var(--primary); text-decoration: none;">회원가입</a>
+            </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: var(--spacing-loose);">
+            <p style="color: var(--text);">또는 카카오로 로그인</p>
+            <div style="display: flex; justify-content: center;">
+                <a href="{{ url_for('kakao.kakao_login') }}" class="button" style="background-color: #FEE500; color: #000; display: flex; align-items: center; justify-content: center;">
+                    <img src="{{ url_for('static', filename='images/kakao-logo.svg') }}" alt="Kakao" style="width: 20px; margin-right: 10px;">
+                    Kakao 로그인
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
