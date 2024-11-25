@@ -30,12 +30,15 @@ interface CoffeeLogContext {
 export const coffeeLogMachine = setup({
   types: {
     context: {} as CoffeeLogContext,
-    events: {} as { type: 'UPDATE'; data: Partial<CoffeeLogContext> },
+    events: {} as {
+      type: 'UPDATE';
+      data: Partial<CoffeeLogContext>;
+    },
   },
   actions: {
-    updateContext: assign((context, event) => ({
+    updateContext: assign((context, event: { type: 'UPDATE'; data: Partial<CoffeeLogContext> }) => ({
       ...context,
-      ...event.data,
+      ...(event?.data || {}),
     })),
   },
 }).createMachine({
