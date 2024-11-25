@@ -18,11 +18,13 @@ const tastingNoteCategories = {
 
 export const CoffeeLogForm = () => {
   const [state, send] = useMachine(coffeeLogMachine, {
-    actions: {
-      updateContext: (context, event) => ({
-        ...context,
-        ...event.data,
-      }),
+    config: {
+      actions: {
+        updateContext: (context, event) => ({
+          ...context,
+          ...event.data,
+        }),
+      },
     },
     services: {
       submitLog: async (context) => {
