@@ -21,9 +21,9 @@ export const CoffeeLogForm = () => {
   const [state, send] = useMachine(coffeeLogMachine, {
     input: {
       actions: {
-        updateContext: assign((context, event) => ({
+        updateContext: assign((context, event: { type: string; data?: any }) => ({
           ...context,
-          ...event.data,
+          ...(event?.data || {}),
         })),
       },
     },
