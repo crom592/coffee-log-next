@@ -2,7 +2,6 @@ import { AuthOptions } from 'next-auth'
 import NextAuth from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import KakaoProvider from 'next-auth/providers/kakao'
-import { JWT } from 'next-auth/jwt'
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -28,9 +27,7 @@ export const authOptions: AuthOptions = {
       return token
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.sub
-      }
+      session.accessToken = token.accessToken
       return session
     },
   },

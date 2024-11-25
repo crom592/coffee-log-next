@@ -1,10 +1,6 @@
 "use client"
 
-import { useSession } from 'next-auth/react'
-
 export default function CommunityPage() {
-  const { data: session } = useSession()
-
   return (
     <div className="page-content">
       <h1 className="page-title">커뮤니티</h1>

@@ -1,9 +1,9 @@
-import { withAuth } from "next-auth/middleware"
-import { NextResponse } from "next/server"
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
 export default withAuth(
-  function middleware(req) {
-    return NextResponse.next()
+  function middleware() {
+    return NextResponse.next();
   },
   {
     callbacks: {
@@ -13,12 +13,11 @@ export default withAuth(
       signIn: "/auth/signin",
     },
   }
-)
+);
 
 export const config = {
   matcher: [
     "/logs/:path*",
     "/community/:path*",
-    "/settings/:path*",
   ],
-}
+};

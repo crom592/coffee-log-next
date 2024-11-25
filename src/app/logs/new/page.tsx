@@ -1,10 +1,8 @@
 "use client"
 
-import { useSession } from 'next-auth/react'
 import { useState } from 'react'
 
 export default function NewLogPage() {
-  const { data: session } = useSession()
   const [formData, setFormData] = useState({
     // 원두 정보
     origin: {
