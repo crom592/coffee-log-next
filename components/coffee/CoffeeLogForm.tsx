@@ -1,22 +1,20 @@
 'use client';
 
-import { useMachine } from '@xstate/react';
-import { setup, assign } from 'xstate';
 import { useState } from 'react';
 
 const roastLevels = ['Light', 'Medium-Light', 'Medium', 'Medium-Dark', 'Dark'];
 const brewingMethods = ['Pour Over', 'French Press', 'Espresso', 'AeroPress', 'Cold Brew'];
 const grindSizes = ['Extra Fine', 'Fine', 'Medium-Fine', 'Medium', 'Medium-Coarse', 'Coarse'];
 const tastingNoteCategories = {
-  'Fruity': ['Berry', 'Citrus', 'Stone Fruit', 'Tropical'],
   'Sweet': ['Caramel', 'Chocolate', 'Honey', 'Vanilla'],
+  'Fruity': ['Berry', 'Citrus', 'Stone Fruit', 'Tropical'],
   'Floral': ['Jasmine', 'Rose', 'Lavender'],
   'Spicy': ['Cinnamon', 'Nutmeg', 'Black Pepper'],
   'Nutty': ['Almond', 'Hazelnut', 'Peanut'],
   'Other': ['Earthy', 'Smoky', 'Woody', 'Herbal'],
 };
 
-interface CoffeeLogContext {
+interface CoffeeLogFormData {
   beanOrigin?: string;
   roastLevel?: string;
   brewingMethod?: string;
@@ -27,87 +25,64 @@ interface CoffeeLogContext {
   rating?: number;
 }
 
-export const coffeeLogMachine = setup({
-  types: {
-    context: {} as CoffeeLogContext,
-    events: {} as {
-      type: 'UPDATE';
-      data: Partial<CoffeeLogContext>;
-    },
-  },
-  actions: {
-    updateContext: assign((context, event: { type: 'UPDATE'; data: Partial<CoffeeLogContext> }) => ({
-      ...context,
-      ...(event?.data || {}),
-    })),
-  },
-}).createMachine({
-  id: 'coffeeLog',
-  initial: 'beanInfo',
-  context: {},
-  states: {
-    beanInfo: {
-      on: {
-        NEXT: 'brewingInfo',
-      },
-    },
-    brewingInfo: {
-      on: {
-        NEXT: 'tastingInfo',
-        BACK: 'beanInfo',
-      },
-    },
-    tastingInfo: {
-      on: {
-        NEXT: 'review',
-        BACK: 'brewingInfo',
-      },
-    },
-    review: {
-      on: {
-        NEXT: 'submitting',
-        BACK: 'tastingInfo',
-      },
-    },
-    submitting: {
-      invoke: {
-        src: 'submitLog',
-        onDone: {
-          target: 'success',
-        },
-        onError: {
-          target: 'error',
-        },
-      },
-    },
-    error: {
-      on: {
-        RETRY: 'submitting',
-      },
-    },
-    success: {
-      on: {
-        NEW: 'beanInfo',
-      },
-    },
-  },
-  services: {
-    submitLog: async (context) => {
-      // API call would go here
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log('Submitted:', context);
-    },
-  },
-});
-
 export const CoffeeLogForm = () => {
-  const [state, send] = useMachine(coffeeLogMachine);
+  const [step, setStep] = useState<'beanInfo' | 'brewingInfo' | 'tastingInfo' | 'review'>('beanInfo');
+  const [formData, setFormData] = useState<CoffeeLogFormData>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<CoffeeLogContext>({});
+  const handleUpdate = (data: Partial<CoffeeLogFormData>) => {
+    setFormData(prev => ({ ...prev, ...data }));
+  };
 
-  const handleUpdate = (data: Partial<CoffeeLogContext>) => {
-    setFormData((prev) => ({ ...prev, ...data }));
-    send({ type: 'UPDATE', data });
+  const handleNext = () => {
+    switch (step) {
+      case 'beanInfo':
+        setStep('brewingInfo');
+        break;
+      case 'brewingInfo':
+        setStep('tastingInfo');
+        break;
+      case 'tastingInfo':
+        setStep('review');
+        break;
+      case 'review':
+        handleSubmit();
+        break;
+    }
+  };
+
+  const handleBack = () => {
+    switch (step) {
+      case 'brewingInfo':
+        setStep('beanInfo');
+        break;
+      case 'tastingInfo':
+        setStep('brewingInfo');
+        break;
+      case 'review':
+        setStep('tastingInfo');
+        break;
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      setError(null);
+      
+      // API call would go here
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Submitted:', formData);
+      
+      // Reset form after successful submission
+      setFormData({});
+      setStep('beanInfo');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to submit coffee log');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -115,17 +90,17 @@ export const CoffeeLogForm = () => {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-yellow-500">
-            {state.matches('beanInfo') && 'Bean Information'}
-            {state.matches('brewingInfo') && 'Brewing Details'}
-            {state.matches('tastingInfo') && 'Tasting Notes'}
-            {state.matches('review') && 'Review'}
+            {step === 'beanInfo' && 'Bean Information'}
+            {step === 'brewingInfo' && 'Brewing Details'}
+            {step === 'tastingInfo' && 'Tasting Notes'}
+            {step === 'review' && 'Review'}
           </h2>
           <div className="text-sm text-gray-400">
-            Step {state.matches('beanInfo') ? '1' : state.matches('brewingInfo') ? '2' : state.matches('tastingInfo') ? '3' : '4'} of 4
+            Step {step === 'beanInfo' ? '1' : step === 'brewingInfo' ? '2' : step === 'tastingInfo' ? '3' : '4'} of 4
           </div>
         </div>
 
-        {state.matches('beanInfo') && (
+        {step === 'beanInfo' && (
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -134,7 +109,7 @@ export const CoffeeLogForm = () => {
               <input
                 type="text"
                 value={formData.beanOrigin || ''}
-                onChange={(e) => handleUpdate({ beanOrigin: e.target.value })}
+                onChange={e => handleUpdate({ beanOrigin: e.target.value })}
                 className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-yellow-500"
                 placeholder="e.g., Ethiopia Yirgacheffe"
               />
@@ -145,11 +120,11 @@ export const CoffeeLogForm = () => {
               </label>
               <select
                 value={formData.roastLevel || ''}
-                onChange={(e) => handleUpdate({ roastLevel: e.target.value })}
+                onChange={e => handleUpdate({ roastLevel: e.target.value })}
                 className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-yellow-500"
               >
                 <option value="">Select roast level</option>
-                {roastLevels.map((level) => (
+                {roastLevels.map(level => (
                   <option key={level} value={level}>
                     {level}
                   </option>
@@ -159,7 +134,7 @@ export const CoffeeLogForm = () => {
           </div>
         )}
 
-        {state.matches('brewingInfo') && (
+        {step === 'brewingInfo' && (
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -167,11 +142,11 @@ export const CoffeeLogForm = () => {
               </label>
               <select
                 value={formData.brewingMethod || ''}
-                onChange={(e) => handleUpdate({ brewingMethod: e.target.value })}
+                onChange={e => handleUpdate({ brewingMethod: e.target.value })}
                 className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-yellow-500"
               >
                 <option value="">Select method</option>
-                {brewingMethods.map((method) => (
+                {brewingMethods.map(method => (
                   <option key={method} value={method}>
                     {method}
                   </option>
@@ -184,11 +159,11 @@ export const CoffeeLogForm = () => {
               </label>
               <select
                 value={formData.grindSize || ''}
-                onChange={(e) => handleUpdate({ grindSize: e.target.value })}
+                onChange={e => handleUpdate({ grindSize: e.target.value })}
                 className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-yellow-500"
               >
                 <option value="">Select grind size</option>
-                {grindSizes.map((size) => (
+                {grindSizes.map(size => (
                   <option key={size} value={size}>
                     {size}
                   </option>
@@ -202,7 +177,7 @@ export const CoffeeLogForm = () => {
               <input
                 type="number"
                 value={formData.waterTemperature || ''}
-                onChange={(e) => handleUpdate({ waterTemperature: Number(e.target.value) })}
+                onChange={e => handleUpdate({ waterTemperature: Number(e.target.value) })}
                 className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-yellow-500"
                 placeholder="e.g., 93"
               />
@@ -214,7 +189,7 @@ export const CoffeeLogForm = () => {
               <input
                 type="text"
                 value={formData.ratio || ''}
-                onChange={(e) => handleUpdate({ ratio: e.target.value })}
+                onChange={e => handleUpdate({ ratio: e.target.value })}
                 className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-yellow-500"
                 placeholder="e.g., 1:16"
               />
@@ -222,7 +197,7 @@ export const CoffeeLogForm = () => {
           </div>
         )}
 
-        {state.matches('tastingInfo') && (
+        {step === 'tastingInfo' && (
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-3">
@@ -232,16 +207,16 @@ export const CoffeeLogForm = () => {
                 {Object.entries(tastingNoteCategories).map(([category, notes]) => (
                   <div key={category} className="space-y-2">
                     <h3 className="text-sm font-medium text-yellow-500">{category}</h3>
-                    {notes.map((note) => (
+                    {notes.map(note => (
                       <label key={note} className="flex items-center space-x-2">
                         <input
                           type="checkbox"
                           checked={formData.tastingNotes?.includes(note) || false}
-                          onChange={(e) => {
+                          onChange={e => {
                             const currentNotes = formData.tastingNotes || [];
                             const newNotes = e.target.checked
                               ? [...currentNotes, note]
-                              : currentNotes.filter((n) => n !== note);
+                              : currentNotes.filter(n => n !== note);
                             handleUpdate({ tastingNotes: newNotes });
                           }}
                           className="text-yellow-500 focus:ring-yellow-500 bg-gray-700 border-gray-600 rounded"
@@ -258,7 +233,7 @@ export const CoffeeLogForm = () => {
                 Rating
               </label>
               <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map((rating) => (
+                {[1, 2, 3, 4, 5].map(rating => (
                   <button
                     key={rating}
                     onClick={() => handleUpdate({ rating })}
@@ -276,7 +251,7 @@ export const CoffeeLogForm = () => {
           </div>
         )}
 
-        {state.matches('review') && (
+        {step === 'review' && (
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-yellow-500">Review your entry</h3>
             <div className="bg-gray-700 rounded-lg p-4 space-y-3">
@@ -323,59 +298,29 @@ export const CoffeeLogForm = () => {
           </div>
         )}
 
-        {state.matches('error') && (
+        {error && (
           <div className="bg-red-900 text-red-100 p-4 rounded-lg mb-4">
-            An error occurred while saving your coffee log. Please try again.
-          </div>
-        )}
-
-        {state.matches('success') && (
-          <div className="bg-green-900 text-green-100 p-4 rounded-lg mb-4">
-            Your coffee log has been saved successfully!
+            {error}
           </div>
         )}
       </div>
 
       <div className="flex justify-between">
         <button
-          onClick={() => send('BACK')}
-          disabled={state.matches('idle') || state.matches('submitting')}
+          onClick={handleBack}
+          disabled={step === 'beanInfo' || isSubmitting}
           className="px-4 py-2 text-gray-300 hover:text-white disabled:opacity-50"
         >
           Back
         </button>
         <div className="space-x-4">
-          {state.matches('success') ? (
-            <button
-              onClick={() => send('NEW')}
-              className="px-4 py-2 bg-yellow-500 text-gray-900 rounded-lg hover:bg-yellow-400"
-            >
-              Create New Log
-            </button>
-          ) : (
-            <button
-              onClick={() =>
-                send(
-                  state.matches('review')
-                    ? 'SUBMIT'
-                    : state.matches('error')
-                    ? 'RETRY'
-                    : 'NEXT'
-                )
-              }
-              disabled={state.matches('submitting')}
-              className="px-4 py-2 bg-yellow-500 text-gray-900 rounded-lg hover:bg-yellow-400 disabled:opacity-50"
-            >
-              {state.matches('submitting') && (
-                <div className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin mr-2" />
-              )}
-              {state.matches('review')
-                ? 'Submit'
-                : state.matches('error')
-                ? 'Retry'
-                : 'Next'}
-            </button>
-          )}
+          <button
+            onClick={handleNext}
+            disabled={isSubmitting}
+            className="px-4 py-2 bg-yellow-500 text-gray-900 rounded-lg hover:bg-yellow-400 disabled:opacity-50"
+          >
+            {step === 'review' ? 'Submit' : 'Next'}
+          </button>
         </div>
       </div>
     </div>
