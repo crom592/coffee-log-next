@@ -22,7 +22,14 @@ export default function Home() {
       <header className={`header ${scrolled ? 'scrolled' : ''}`}>
         <div className="header-content">
           <Link href="/" className="logo">
-            Coffee Log
+            <Image
+              src="/images/coffee-bag.png"
+              alt="Coffee Log"
+              width={32}
+              height={32}
+              className="logo-image"
+            />
+            <span>Coffee Log</span>
           </Link>
           <nav className="nav-menu">
             <Link href="/about" className="nav-link">About</Link>
