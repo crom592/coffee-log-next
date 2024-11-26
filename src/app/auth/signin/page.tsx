@@ -1,17 +1,46 @@
-"use client"
+'use client'
 
 import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
+import "../../../styles/auth.css";
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') || '/logs'
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     // TODO: Implement email/password sign in
+  }
+
+  const handleSocialSignIn = async (provider: string) => {
+    try {
+      const result = await signIn(provider, {
+        callbackUrl,
+        redirect: true,
+      })
+      
+      if (result?.error) {
+        // Handle specific error cases
+        switch (result.error) {
+          case "AccessDenied":
+            console.error("Access denied by provider")
+            break
+          case "EmailSignin":
+            console.error("Email signin error")
+            break
+          default:
+            console.error("Authentication error:", result.error)
+        }
+      }
+    } catch (error) {
+      console.error('Sign in error:', error)
+    }
   }
 
   return (
@@ -36,7 +65,7 @@ export default function SignIn() {
         
         <div className="auth-providers">
           <button
-            onClick={() => signIn('google', { callbackUrl: '/logs' })}
+            onClick={() => handleSocialSignIn('google')}
             className="auth-provider-button google"
           >
             <Image src="/images/google.svg" alt="Google" width={24} height={24} />
@@ -44,7 +73,7 @@ export default function SignIn() {
           </button>
           
           <button
-            onClick={() => signIn('kakao', { callbackUrl: '/logs' })}
+            onClick={() => handleSocialSignIn('kakao')}
             className="auth-provider-button kakao"
           >
             <Image src="/images/kakao.svg" alt="Kakao" width={24} height={24} />
@@ -66,6 +95,7 @@ export default function SignIn() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your@email.com"
               required
+              autoComplete="email"
             />
           </div>
 
@@ -78,6 +108,7 @@ export default function SignIn() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
+              autoComplete="current-password"
             />
           </div>
 

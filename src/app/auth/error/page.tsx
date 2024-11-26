@@ -1,10 +1,11 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 
-export default function AuthError() {
+function ErrorContent() {
   const searchParams = useSearchParams()
   const error = searchParams.get('error')
 
@@ -17,6 +18,18 @@ export default function AuthError() {
     errorMessage = '이메일 인증에 실패했습니다.'
   }
 
+  return (
+    <div className="auth-error">
+      <h1>로그인 오류</h1>
+      <p>{errorMessage}</p>
+      <Link href="/auth/signin" className="button button-primary">
+        다시 시도하기
+      </Link>
+    </div>
+  )
+}
+
+export default function AuthError() {
   return (
     <div className="auth-page">
       <div className="auth-background">
@@ -35,13 +48,9 @@ export default function AuthError() {
           Coffee Log
         </Link>
         
-        <div className="auth-error">
-          <h1>로그인 오류</h1>
-          <p>{errorMessage}</p>
-          <Link href="/auth/signin" className="button button-primary">
-            다시 시도하기
-          </Link>
-        </div>
+        <Suspense fallback={<div>Loading...</div>}>
+          <ErrorContent />
+        </Suspense>
       </div>
     </div>
   )

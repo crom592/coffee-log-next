@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 
 interface MainLayoutProps {
@@ -22,10 +22,16 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
               {session && (
                 <div className="ml-8 flex items-center space-x-4">
                   <Link
-                    href="/log"
+                    href="/logs/new"
                     className="text-gray-300 hover:text-yellow-500 px-3 py-2 rounded-md text-sm font-medium"
                   >
                     New Log
+                  </Link>
+                  <Link
+                    href="/logs"
+                    className="text-gray-300 hover:text-yellow-500 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    My Logs
                   </Link>
                   <Link
                     href="/dashboard"

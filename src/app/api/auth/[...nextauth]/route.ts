@@ -1,10 +1,10 @@
-import { NextAuthOptions } from "next-auth"
+import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import KakaoProvider from "next-auth/providers/kakao"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 
-export const authOptions: NextAuthOptions = {
+const handler = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -14,11 +14,16 @@ export const authOptions: NextAuthOptions = {
     KakaoProvider({
       clientId: process.env.KAKAO_CLIENT_ID!,
       clientSecret: process.env.KAKAO_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          scope: 'profile_nickname profile_image'
+        }
+      }
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: 'database',
+    strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
@@ -27,9 +32,9 @@ export const authOptions: NextAuthOptions = {
     error: '/auth/error',
   },
   callbacks: {
-    async session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
+    async session({ session, token }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
       }
       return session;
     },
@@ -42,25 +47,21 @@ export const authOptions: NextAuthOptions = {
       else if (new URL(url).origin === baseUrl) {
         return url
       }
-      return `${baseUrl}/logs`
-    },
+      return baseUrl
+    }
   },
   debug: process.env.NODE_ENV === 'development',
-}
-
-declare module 'next-auth' {
-  interface Session {
-    accessToken?: string
-    user: {
-      id?: string
-      name?: string | null
-      email?: string | null
-      image?: string | null
+  logger: {
+    error(code, ...message) {
+      console.error(code, ...message)
+    },
+    warn(code, ...message) {
+      console.warn(code, ...message)
+    },
+    debug(code, ...message) {
+      console.debug(code, ...message)
     }
   }
+})
 
-  interface JWT {
-    accessToken?: string
-    sub?: string
-  }
-}
+export { handler as GET, handler as POST }

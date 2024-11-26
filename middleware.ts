@@ -1,28 +1,20 @@
-import { withAuth } from 'next-auth/middleware';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { withAuth } from "next-auth/middleware";
 
-export default withAuth(
-  function middleware(req: NextRequest) {
-    return NextResponse.next();
+export default withAuth({
+  callbacks: {
+    authorized: ({ token }) => !!token,
   },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
-    pages: {
-      signIn: '/auth/login',
-      error: '/auth/error',
-    },
-  }
-);
+  pages: {
+    signIn: '/auth/signin',
+    error: '/auth/error',
+  },
+});
 
 export const config = {
   matcher: [
-    '/log/:path*',
-    '/profile/:path*',
-    '/dashboard/:path*',
-    '/settings/:path*',
-    '/api/coffee/:path*',
+    "/logs/:path*",
+    "/dashboard/:path*",
+    "/api/logs/:path*",
+    "/api/dashboard/:path*"
   ],
 };

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import "../../../styles/logs.css";
 
 export default function NewLogPage() {
   const [formData, setFormData] = useState({
