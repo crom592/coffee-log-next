@@ -28,8 +28,6 @@ export const authOptions: NextAuthOptions = {
     signIn: "/auth/signin",
     signOut: "/auth/signout",
     error: "/auth/error",
-    verifyRequest: "/auth/verify-request",
-    newUser: "/auth/success"
   },
   callbacks: {
     async session({ session, user }) {
@@ -38,6 +36,17 @@ export const authOptions: NextAuthOptions = {
       }
       return session
     },
+    async redirect({ url, baseUrl }) {
+      // Always redirect to success page after sign in
+      if (url.startsWith(baseUrl)) {
+        return '/auth/success'
+      }
+      // Allows relative callback URLs
+      else if (url.startsWith("/")) {
+        return `${baseUrl}${url}`
+      }
+      return url
+    }
   },
   debug: process.env.NODE_ENV === "development",
 }
