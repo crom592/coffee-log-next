@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Noto_Serif_KR } from 'next/font/google'
 import './globals.css'
 import { getServerSession } from 'next-auth'
 import SessionProvider from '@/components/SessionProvider'
 import Navigation from '@/components/Navigation'
-import { NextAuthProvider } from '@/components/providers'
 
-const inter = Inter({ subsets: ['latin'] })
+const notoSerif = Noto_Serif_KR({ 
+  subsets: ['latin'],
+  weight: ['400', '700'] 
+})
 
 export const metadata: Metadata = {
   title: 'Coffee Log',
@@ -25,12 +27,10 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={notoSerif.className}>
         <SessionProvider session={session}>
-          <NextAuthProvider>
-            <Navigation />
-            {children}
-          </NextAuthProvider>
+          <Navigation />
+          {children}
         </SessionProvider>
       </body>
     </html>
