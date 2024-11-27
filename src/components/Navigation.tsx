@@ -14,7 +14,7 @@ export default function Navigation() {
     <nav className="bg-[#E9E5E0] shadow-sm">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex">
+          <div className="flex items-center space-x-8">
             <Link
               href="/"
               className="flex items-center px-2 py-2 text-[#1B4332] hover:text-[#143728] transition-colors"
@@ -22,6 +22,33 @@ export default function Navigation() {
               <Coffee className="w-6 h-6 mr-2" />
               <span className="font-serif text-lg">Coffee Log</span>
             </Link>
+            
+            <div className="hidden sm:flex items-center space-x-6">
+              <Link
+                href="/logs/beans"
+                className="text-[#1B4332] hover:text-[#143728] transition-colors"
+              >
+                Beans
+              </Link>
+              <Link
+                href="/logs/brewing"
+                className="text-[#1B4332] hover:text-[#143728] transition-colors"
+              >
+                Brewing
+              </Link>
+              <Link
+                href="/logs/history"
+                className="text-[#1B4332] hover:text-[#143728] transition-colors"
+              >
+                History
+              </Link>
+              <Link
+                href="/logs/new"
+                className="text-[#1B4332] hover:text-[#143728] transition-colors"
+              >
+                New Log
+              </Link>
+            </div>
           </div>
 
           <div className="flex items-center">
