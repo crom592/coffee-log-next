@@ -1,66 +1,94 @@
-'use client'
+import { Metadata } from 'next'
+import Link from 'next/link'
+import { ChevronLeft, PenLine, BarChart3, Users } from 'lucide-react'
 
-import Header from '../../components/Header'
-import '../../styles/about.css'
+export const metadata: Metadata = {
+  title: 'About - Coffee Log',
+  description: 'Learn more about Coffee Log and its features',
+}
 
 export default function AboutPage() {
   return (
-    <div>
-      <Header />
-      <div className="about-page">
-        <div className="about-header">
-          <h1 className="about-title">About Coffee Log</h1>
-          <p className="about-subtitle">당신의 커피 여정을 기록하세요</p>
-        </div>
+    <div className="min-h-screen bg-[#FAF7F2]">
+      <div className="container max-w-md mx-auto p-4">
+        <header className="flex items-center mb-8">
+          <Link href="/">
+            <button className="mr-4 p-2 hover:bg-[#E9E5E0] rounded-lg transition-colors">
+              <ChevronLeft className="h-6 w-6 text-[#1B4332]" />
+            </button>
+          </Link>
+          <h1 className="text-[#1B4332] text-2xl font-serif">About Coffee Log</h1>
+        </header>
 
-        <div className="about-content">
-          <section className="feature-section">
-            <h2>주요 기능</h2>
-            <div className="feature-grid">
-              <div className="feature-card">
-                <div className="feature-icon">📝</div>
-                <h3>상세한 기록</h3>
-                <p>원두 정보부터 추출 방법까지 모든 것을 기록할 수 있습니다.</p>
+        <div className="space-y-8">
+          <div className="bg-[#E9E5E0] rounded-2xl p-6">
+            <h2 className="text-xl font-serif text-[#1B4332] mb-4">What is Coffee Log?</h2>
+            <p className="text-[#1B4332]/80 leading-relaxed">
+              Coffee Log is your digital companion for documenting and sharing your coffee journey. 
+              Whether you're a casual coffee drinker or a dedicated enthusiast, our platform helps 
+              you track every detail of your coffee experiences.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-xl font-serif text-[#1B4332] px-2">Key Features</h2>
+            
+            <div className="bg-[#E9E5E0] rounded-2xl p-6 space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-[#1B4332] rounded-lg">
+                  <PenLine className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-[#1B4332] mb-1">Detailed Logging</h3>
+                  <p className="text-[#1B4332]/80 text-sm">
+                    Record every aspect of your coffee, from bean origin to brewing parameters.
+                  </p>
+                </div>
               </div>
-              <div className="feature-card">
-                <div className="feature-icon">📊</div>
-                <h3>데이터 분석</h3>
-                <p>기록된 데이터를 바탕으로 당신의 커피 취향을 분석해드립니다.</p>
+
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-[#1B4332] rounded-lg">
+                  <BarChart3 className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-[#1B4332] mb-1">Data Analysis</h3>
+                  <p className="text-[#1B4332]/80 text-sm">
+                    Track your preferences and discover patterns in your coffee experiences.
+                  </p>
+                </div>
               </div>
-              <div className="feature-card">
-                <div className="feature-icon">🤝</div>
-                <h3>커뮤니티</h3>
-                <p>다른 커피 애호가들과 경험을 공유하고 소통할 수 있습니다.</p>
+
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-[#1B4332] rounded-lg">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-[#1B4332] mb-1">Community</h3>
+                  <p className="text-[#1B4332]/80 text-sm">
+                    Share experiences and learn from fellow coffee enthusiasts.
+                  </p>
+                </div>
               </div>
             </div>
-          </section>
+          </div>
 
-          <section className="how-to-section">
-            <h2>시작하기</h2>
-            <div className="steps-container">
-              <div className="step">
-                <div className="step-number">1</div>
-                <h3>회원가입</h3>
-                <p>간단한 회원가입으로 시작하세요.</p>
-              </div>
-              <div className="step">
-                <div className="step-number">2</div>
-                <h3>첫 기록 작성</h3>
-                <p>마신 커피에 대한 정보를 기록해보세요.</p>
-              </div>
-              <div className="step">
-                <div className="step-number">3</div>
-                <h3>공유하기</h3>
-                <p>나만의 커피 경험을 다른 사람들과 공유하세요.</p>
-              </div>
-            </div>
-          </section>
-
-          <section className="cta-section">
-            <h2>지금 시작하세요</h2>
-            <p>당신의 커피 여정이 기다리고 있습니다.</p>
-            <a href="/auth/signin" className="cta-button">시작하기</a>
-          </section>
+          <div className="bg-[#E9E5E0] rounded-2xl p-6">
+            <h2 className="text-xl font-serif text-[#1B4332] mb-4">Getting Started</h2>
+            <ol className="space-y-4 text-[#1B4332]/80">
+              <li className="flex gap-3">
+                <span className="font-serif text-[#1B4332]">1.</span>
+                Create an account to start your coffee journey
+              </li>
+              <li className="flex gap-3">
+                <span className="font-serif text-[#1B4332]">2.</span>
+                Log your first coffee experience with our detailed form
+              </li>
+              <li className="flex gap-3">
+                <span className="font-serif text-[#1B4332]">3.</span>
+                Share your insights with the community
+              </li>
+            </ol>
+          </div>
         </div>
       </div>
     </div>

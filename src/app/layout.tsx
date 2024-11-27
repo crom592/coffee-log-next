@@ -1,38 +1,37 @@
-import type { Metadata } from "next"
-import { Providers } from "./providers"
-import "./globals.css"
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { getServerSession } from 'next-auth'
+import SessionProvider from '@/components/SessionProvider'
+import Navigation from '@/components/Navigation'
+import { NextAuthProvider } from '@/components/providers'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "Coffee Log",
-  description: "나만의 커피 기록",
+  title: 'Coffee Log',
+  description: 'Track your coffee brewing journey',
   icons: {
-    icon: [
-      {
-        url: "/images/coffee-bag.png",
-        type: "image/png",
-      }
-    ],
-    shortcut: ["/images/coffee-bag.png"],
-    apple: [
-      {
-        url: "/images/coffee-bag.png",
-        type: "image/png",
-      }
-    ]
-  }
+    icon: '/favicon.ico',
+  },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await getServerSession()
+
   return (
-    <html lang="ko">
-      <body>
-        <Providers>
-          {children}
-        </Providers>
+    <html lang="en">
+      <body className={inter.className}>
+        <SessionProvider session={session}>
+          <NextAuthProvider>
+            <Navigation />
+            {children}
+          </NextAuthProvider>
+        </SessionProvider>
       </body>
     </html>
   )

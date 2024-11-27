@@ -28,35 +28,13 @@ export async function POST(request: Request) {
     const coffeeLog = await prisma.coffeeLog.create({
       data: {
         userId: session.user.id,
-        // 원두 정보
-        originCountry: data.origin.country,
-        originRegion: data.origin.region || '',
-        originFarm: data.origin.farm || '',
-        originAltitude: data.origin.altitude || '',
-        processing: data.processing || '',
-        roastPoint: data.roastPoint || '',
-        beanNotes: data.beanNotes || '',
-
-        // 추출 정보
-        waterType: data.waterType || '',
-        dose: data.dose || '',
-        waterAmount: data.waterAmount || '',
-        ratio: data.ratio || '',
-        grinder: data.grinder || '',
-        grindSize: data.grindSize || '',
-        waterTemp: data.waterTemp || '',
-        dripper: data.dripper || '',
-        filter: data.filter || '',
-        recipe: data.recipe || '',
-        brewTime: data.brewTime || '',
-        tds: data.tds || '',
-        extraction: data.extraction || '',
-        cupNotes: data.cupNotes || '',
-        improvements: data.improvements || '',
-
-        // 공유 설정
-        isPublic: data.isPublic || false,
-        allowCollaboration: data.allowCollaboration || false,
+        roastName: data.roastName || '',
+        origin: data.origin.country,
+        roastLevel: data.roastLevel || '',
+        brewMethod: data.brewMethod || '',
+        tastingNotes: data.tastingNotes || '',
+        rating: data.rating || 0,
+        isPublic: data.isPublic || false
       }
     })
 

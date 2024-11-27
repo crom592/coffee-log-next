@@ -1,5 +1,5 @@
 import { interpret } from 'xstate';
-import { loginMachine, type LoginEvent, type LoginContext } from './loginMachine';
+import { loginMachine, type LoginEvent } from './loginMachine';
 
 describe('loginMachine', () => {
   beforeEach(() => {

@@ -1,7 +1,20 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { z } from 'zod'
+
+const coffeeLogSchema = z.object({
+  roastName: z.string(),
+  origin: z.object({
+    country: z.string(),
+  }),
+  roastLevel: z.string(),
+  brewMethod: z.string(),
+  rating: z.number(),
+  tastingNotes: z.string().optional(),
+  isPublic: z.boolean().optional(),
+})
 
 export async function GET(
   request: Request,
@@ -59,7 +72,8 @@ export async function PUT(
     }
 
     const data = await request.json()
-    
+    const parsedData = coffeeLogSchema.parse(data)
+
     // Check if the log exists and belongs to the user
     const existingLog = await prisma.coffeeLog.findUnique({
       where: {
@@ -80,35 +94,24 @@ export async function PUT(
         id: params.id
       },
       data: {
-        originCountry: data.origin.country,
-        originRegion: data.origin.region,
-        originFarm: data.origin.farm,
-        originAltitude: data.origin.altitude,
-        processing: data.processing,
-        roastPoint: data.roastPoint,
-        beanNotes: data.beanNotes,
-        waterType: data.waterType,
-        dose: data.dose,
-        waterAmount: data.waterAmount,
-        ratio: data.ratio,
-        grinder: data.grinder,
-        grindSize: data.grindSize,
-        waterTemp: data.waterTemp,
-        dripper: data.dripper,
-        filter: data.filter,
-        recipe: data.recipe,
-        brewTime: data.brewTime,
-        tds: data.tds,
-        extraction: data.extraction,
-        cupNotes: data.cupNotes,
-        improvements: data.improvements,
-        isPublic: data.isPublic,
-        allowCollaboration: data.allowCollaboration,
+        roastName: parsedData.roastName,
+        origin: parsedData.origin.country,
+        roastLevel: parsedData.roastLevel,
+        brewMethod: parsedData.brewMethod,
+        tastingNotes: parsedData.tastingNotes,
+        rating: parsedData.rating,
+        isPublic: data.isPublic
       }
     })
 
     return NextResponse.json(updatedLog)
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid request data', details: error.message },
+        { status: 400 }
+      )
+    }
     console.error('Error updating coffee log:', error)
     return NextResponse.json(
       { error: 'Failed to update coffee log', details: error instanceof Error ? error.message : 'Unknown error' },

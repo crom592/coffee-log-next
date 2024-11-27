@@ -2,12 +2,13 @@
 
 import { signIn } from 'next-auth/react'
 import { useState } from 'react'
+import { Suspense } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
-import "../../../styles/auth.css";
+import { Coffee, ChevronLeft, Mail } from 'lucide-react'
+import Image from 'next/image'
 
-export default function SignIn() {
+function SignInContent() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const searchParams = useSearchParams()
@@ -26,7 +27,6 @@ export default function SignIn() {
       })
       
       if (result?.error) {
-        // Handle specific error cases
         switch (result.error) {
           case "AccessDenied":
             console.error("Access denied by provider")
@@ -44,86 +44,101 @@ export default function SignIn() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-background">
-        <Image
-          src="/images/coffee-beans-dark.jpg"
-          alt="Coffee Beans"
-          fill
-          priority
-          quality={100}
-          style={{ objectFit: 'cover' }}
-        />
-      </div>
-      
-      <div className="auth-container">
-        <Link href="/" className="auth-logo">
-          Coffee Log
-        </Link>
-        
-        <h1 className="auth-title">Welcome Back</h1>
-        
-        <div className="auth-providers">
-          <button
-            onClick={() => handleSocialSignIn('google')}
-            className="auth-provider-button google"
-          >
-            <Image src="/images/google.svg" alt="Google" width={24} height={24} />
-            Continue with Google
-          </button>
-          
-          <button
-            onClick={() => handleSocialSignIn('kakao')}
-            className="auth-provider-button kakao"
-          >
-            <Image src="/images/kakao.svg" alt="Kakao" width={24} height={24} />
-            카카오로 계속하기
-          </button>
-        </div>
-
-        <div className="auth-divider">
-          <span>or</span>
-        </div>
-
-        <form onSubmit={handleEmailSignIn} className="auth-form">
-          <div className="form-group">
-            <label className="form-label">Email</label>
-            <input
-              type="email"
-              className="form-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              required
-              autoComplete="email"
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Password</label>
-            <input
-              type="password"
-              className="form-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              autoComplete="current-password"
-            />
-          </div>
-
-          <button type="submit" className="button button-primary button-large" style={{ width: '100%' }}>
-            Sign In
-          </button>
-        </form>
-
-        <p className="auth-footer">
-          Don't have an account?{' '}
-          <Link href="/auth/signup" className="auth-link">
-            Sign Up
+    <div className="min-h-screen bg-[#FAF7F2]">
+      <div className="container max-w-md mx-auto p-4">
+        <header className="flex items-center mb-8">
+          <Link href="/">
+            <button className="mr-4 p-2 hover:bg-[#E9E5E0] rounded-lg transition-colors">
+              <ChevronLeft className="h-6 w-6 text-[#1B4332]" />
+            </button>
           </Link>
-        </p>
+          <h1 className="text-[#1B4332] text-2xl font-serif">Sign In</h1>
+        </header>
+
+        <div className="space-y-6">
+          <div className="text-center">
+            <Coffee className="h-16 w-16 mx-auto mb-6 text-[#1B4332]" />
+            <h2 className="text-xl font-serif text-[#1B4332] mb-2">Welcome Back!</h2>
+            <p className="text-[#1B4332]/80">Sign in to continue your coffee journey</p>
+          </div>
+
+          <div className="bg-[#E9E5E0] rounded-2xl p-6 space-y-6">
+            <div className="space-y-3">
+              <button
+                onClick={() => handleSocialSignIn('google')}
+                className="w-full py-3 px-6 bg-white text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 border border-gray-300"
+              >
+                <Image src="/images/google.svg" alt="Google" width={20} height={20} />
+                Continue with Google
+              </button>
+
+              <button
+                onClick={() => handleSocialSignIn('kakao')}
+                className="w-full py-3 px-6 bg-[#FEE500] text-[#3C1E1E] font-medium rounded-lg hover:bg-[#FDD800] transition-colors flex items-center justify-center gap-2"
+              >
+                <Image src="/images/kakao.svg" alt="Kakao" width={20} height={20} />
+                카카오로 계속하기
+              </button>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[#1B4332]/20"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-[#E9E5E0] text-[#1B4332]/60">or</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleEmailSignIn} className="space-y-4">
+              <div>
+                <label className="block text-[#1B4332] font-serif mb-2">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full p-2 rounded-lg border border-[#1B4332]/20 bg-white focus:outline-none focus:ring-2 focus:ring-[#1B4332]"
+                  placeholder="Enter your email"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#1B4332] font-serif mb-2">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-2 rounded-lg border border-[#1B4332]/20 bg-white focus:outline-none focus:ring-2 focus:ring-[#1B4332]"
+                  placeholder="Enter your password"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 px-6 bg-[#1B4332] text-white font-serif rounded-lg hover:bg-[#143728] transition-colors flex items-center justify-center gap-2"
+              >
+                <Mail className="h-5 w-5" />
+                Sign in with Email
+              </button>
+            </form>
+          </div>
+
+          <p className="text-center text-[#1B4332]/60">
+            Don't have an account?{' '}
+            <Link href="/auth/signup" className="text-[#1B4332] font-serif hover:underline">
+              Sign up
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
+  )
+}
+
+export default function SignIn() {
+  return (
+    <Suspense>
+      <SignInContent />
+    </Suspense>
   )
 }

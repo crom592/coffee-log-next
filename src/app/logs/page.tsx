@@ -1,10 +1,9 @@
-"use client"
+'use client'
 
 import { useSession } from 'next-auth/react'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Header from '../../components/Header'
-import "../../styles/logs.css"
+import { Plus, Coffee, BookOpen, History } from 'lucide-react'
 
 export default function LogsPage() {
   const { status } = useSession({
@@ -16,33 +15,53 @@ export default function LogsPage() {
 
   if (status === "loading") {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF7F2]">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-[#1B4332] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[#1B4332]">Loading...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div>
-      <Header />
-      <div className="page-content">
-        <div className="page-header">
-          <h1 className="page-title">커피 기록</h1>
-          <Link href="/logs/new" className="button button-primary">
-            새 기록 작성
+    <div className="min-h-screen bg-[#FAF7F2]">
+      <div className="container max-w-md mx-auto p-4">
+        <header className="flex justify-between items-center mb-8">
+          <Link href="/" className="text-[#1B4332] text-3xl font-serif">
+            Coffee Log
           </Link>
-        </div>
-        
-        <div className="card">
-          <div className="empty-state">
-            <div className="empty-state-icon">☕</div>
-            <h2 className="empty-state-title">아직 커피 기록이 없습니다</h2>
-            <p className="empty-state-description">당신의 커피 여정을 기록해보세요.</p>
-            <Link href="/logs/new" className="button button-primary button-large">
-              첫 커피 기록 작성하기
-            </Link>
-          </div>
+          <div className="w-8 h-8 bg-[#E9E5E0] rounded-full"></div>
+        </header>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Link href="/logs/new">
+            <div className="group hover:shadow-md transition-shadow p-6 flex flex-col items-center justify-center min-h-[160px] bg-[#E9E5E0] rounded-2xl">
+              <Plus className="h-8 w-8 mb-3 text-[#1B4332] group-hover:scale-110 transition-transform" />
+              <span className="text-[#1B4332] font-serif text-lg text-center">New Entry</span>
+            </div>
+          </Link>
+
+          <Link href="/logs/beans">
+            <div className="group hover:shadow-md transition-shadow p-6 flex flex-col items-center justify-center min-h-[160px] bg-[#E9E5E0] rounded-2xl">
+              <Coffee className="h-8 w-8 mb-3 text-[#1B4332] group-hover:scale-110 transition-transform" />
+              <span className="text-[#1B4332] font-serif text-lg text-center">My Beans</span>
+            </div>
+          </Link>
+
+          <Link href="/logs/brewing">
+            <div className="group hover:shadow-md transition-shadow p-6 flex flex-col items-center justify-center min-h-[160px] bg-[#E9E5E0] rounded-2xl">
+              <BookOpen className="h-8 w-8 mb-3 text-[#1B4332] group-hover:scale-110 transition-transform" />
+              <span className="text-[#1B4332] font-serif text-lg text-center">Brewing Notes</span>
+            </div>
+          </Link>
+
+          <Link href="/logs/history">
+            <div className="group hover:shadow-md transition-shadow p-6 flex flex-col items-center justify-center min-h-[160px] bg-[#E9E5E0] rounded-2xl">
+              <History className="h-8 w-8 mb-3 text-[#1B4332] group-hover:scale-110 transition-transform" />
+              <span className="text-[#1B4332] font-serif text-lg text-center">History</span>
+            </div>
+          </Link>
         </div>
       </div>
     </div>
