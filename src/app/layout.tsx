@@ -14,7 +14,14 @@ export const metadata: Metadata = {
   title: 'Coffee Log',
   description: 'Track your coffee brewing journey',
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      {
+        url: '/favicon/favicon.png',
+        type: 'image/png',
+      }
+    ],
+    shortcut: '/favicon/favicon.png',
+    apple: '/favicon/favicon.png',
   },
 }
 
@@ -27,6 +34,10 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" type="image/png" href="/favicon/favicon.png" />
+        <link rel="apple-touch-icon" href="/favicon/favicon.png" />
+      </head>
       <body className={notoSerif.className}>
         <SessionProvider session={session}>
           <Navigation />
