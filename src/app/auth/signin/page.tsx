@@ -32,7 +32,7 @@ export default function SignIn() {
             className="w-full bg-white hover:bg-gray-50 text-gray-900 font-medium py-3 px-4 rounded-lg border border-gray-300 flex items-center justify-center space-x-3 transition-colors"
           >
             <Image
-              src="/google.svg"
+              src="/images/google.svg"
               alt="Google"
               width={20}
               height={20}
@@ -46,7 +46,7 @@ export default function SignIn() {
             className="w-full bg-[#FEE500] hover:bg-[#FEE500]/90 text-[#391B1B] font-medium py-3 px-4 rounded-lg border border-[#FEE500] flex items-center justify-center space-x-3 transition-colors"
           >
             <Image
-              src="/kakao.svg"
+              src="/images/kakao.svg"
               alt="Kakao"
               width={20}
               height={20}
