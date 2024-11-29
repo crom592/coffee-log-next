@@ -6,17 +6,19 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session) {
+    if (!session?.user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const body = await request.json();
-    const { name, description } = body;
+    const { name, description } = await request.json();
 
     const method = await prisma.brewMethod.create({
       data: {
-        userId: session.user.id,
+        user: {
+          connect: {
+            id: session.user.id
+          }
+        },
         name,
         description,
       },
@@ -24,22 +26,21 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(method);
   } catch (error) {
-    console.error("[METHODS_POST]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.error(error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
     const methods = await prisma.brewMethod.findMany({
-      where: {
-        userId: session.user.id,
+      include: {
+        user: {
+          select: {
+            name: true,
+            image: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(methods);
   } catch (error) {
-    console.error("[METHODS_GET]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.error(error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
