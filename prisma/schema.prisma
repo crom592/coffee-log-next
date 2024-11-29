@@ -55,6 +55,10 @@ model User {
   brewMethods   BrewMethod[]
   posts         Post[]
   comments      Comment[]
+  likes         Like[]
+  bookmarks     Bookmark[]
+  followers     Follow[]    @relation("UserFollowers")
+  following     Follow[]    @relation("UserFollowing")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -111,6 +115,7 @@ model Log {
   time        Int
   notes       String?  @db.Text
   rating      Int
+  posts       Post[]
 
   @@index([userId])
   @@index([beanId])
@@ -125,10 +130,15 @@ model Post {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logId       String?
+  user        User      @relation(fields: [userId], references: [id])
+  log         Log?      @relation(fields: [logId], references: [id])
   comments    Comment[]
+  likes       Like[]
+  bookmarks   Bookmark[]
 
   @@index([userId])
+  @@index([logId])
 }
 
 model Comment {
@@ -143,4 +153,43 @@ model Comment {
 
   @@index([userId])
   @@index([postId])
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  followerId  String
+  followingId String
+  follower    User     @relation("UserFollowers", fields: [followerId], references: [id])
+  following   User     @relation("UserFollowing", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
 }

@@ -12,29 +12,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { beanId, methodId, grindSize, temperature, ratio, time, notes, rating } = body;
+    const { name, description } = body;
 
-    const log = await prisma.log.create({
+    const method = await prisma.brewMethod.create({
       data: {
         userId: session.user.id,
-        beanId,
-        methodId,
-        grindSize,
-        temperature,
-        ratio,
-        time,
-        notes,
-        rating,
-      },
-      include: {
-        bean: true,
-        method: true,
+        name,
+        description,
       },
     });
 
-    return NextResponse.json(log);
+    return NextResponse.json(method);
   } catch (error) {
-    console.error("[LOGS_POST]", error);
+    console.error("[METHODS_POST]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -47,32 +37,18 @@ export async function GET(request: NextRequest) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
-
-    const logs = await prisma.log.findMany({
+    const methods = await prisma.brewMethod.findMany({
       where: {
-        userId: userId || session.user.id,
-      },
-      include: {
-        bean: true,
-        method: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-          },
-        },
+        userId: session.user.id,
       },
       orderBy: {
         createdAt: "desc",
       },
     });
 
-    return NextResponse.json(logs);
+    return NextResponse.json(methods);
   } catch (error) {
-    console.error("[LOGS_GET]", error);
+    console.error("[METHODS_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
