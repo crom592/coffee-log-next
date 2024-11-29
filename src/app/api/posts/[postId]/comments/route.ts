@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createNotification } from "@/lib/notifications";
 
 export async function POST(
   request: NextRequest,
@@ -14,11 +13,10 @@ export async function POST(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const { content } = await request.json();
+    const body = await request.json();
 
     const post = await prisma.post.findUnique({
       where: { id: params.postId },
-      select: { userId: true },
     });
 
     if (!post) {
@@ -27,17 +25,17 @@ export async function POST(
 
     const comment = await prisma.comment.create({
       data: {
+        content: body.content,
         user: {
           connect: {
-            id: session.user.id
+            id: session.user.id as string
           }
         },
         post: {
           connect: {
             id: params.postId
           }
-        },
-        content,
+        }
       },
       include: {
         user: {
@@ -50,13 +48,14 @@ export async function POST(
       },
     });
 
-    // Create notification if the comment is not on the user's own post
     if (post.userId !== session.user.id) {
-      await createNotification({
-        type: "COMMENT",
-        userId: post.userId,
-        actorId: session.user.id,
-        postId: params.postId,
+      await prisma.notification.create({
+        data: {
+          type: "COMMENT",
+          userId: post.userId,
+          actorId: session.user.id as string,
+          postId: params.postId,
+        }
       });
     }
 

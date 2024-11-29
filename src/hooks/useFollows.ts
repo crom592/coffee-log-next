@@ -1,5 +1,4 @@
-import { SWRInfiniteResponse } from 'swr/infinite';
-import { default as useSWRInfinite } from 'swr/infinite';
+import { SWRInfiniteResponse, useSWRInfinite } from 'swr/infinite';
 import { User } from "@prisma/client";
 
 interface UserWithFollowCounts extends Pick<User, "id" | "name" | "image"> {
