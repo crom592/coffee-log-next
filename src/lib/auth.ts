@@ -1,10 +1,15 @@
 import { NextAuthOptions } from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import KakaoProvider from "next-auth/providers/kakao"
+import GoogleProvider from "next-auth/providers/google"
 import { prisma } from "@/lib/prisma"
 
 if (!process.env.KAKAO_CLIENT_ID || !process.env.KAKAO_CLIENT_SECRET) {
   throw new Error("Missing Kakao OAuth credentials")
+}
+
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  throw new Error("Missing Google OAuth credentials")
 }
 
 if (!process.env.NEXTAUTH_SECRET) {
@@ -14,9 +19,18 @@ if (!process.env.NEXTAUTH_SECRET) {
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     KakaoProvider({
       clientId: process.env.KAKAO_CLIENT_ID,
       clientSecret: process.env.KAKAO_CLIENT_SECRET,
+      authorization: {
+        params: {
+          scope: "profile_nickname profile_image"
+        }
+      }
     }),
   ],
   session: {
@@ -37,15 +51,15 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Always redirect to success page after sign in
-      if (url.startsWith(baseUrl)) {
-        return '/auth/success'
-      }
       // Allows relative callback URLs
-      else if (url.startsWith("/")) {
+      if (url.startsWith("/")) {
         return `${baseUrl}${url}`
       }
-      return url
+      // Allow callbacks to specified URLs
+      else if (url.startsWith(baseUrl)) {
+        return url
+      }
+      return '/auth/success'
     }
   },
   debug: process.env.NODE_ENV === "development",
