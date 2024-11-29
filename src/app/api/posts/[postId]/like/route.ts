@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createNotification } from "@/lib/notifications";
 
 export async function POST(
   request: NextRequest,
@@ -17,7 +16,7 @@ export async function POST(
     const existingLike = await prisma.like.findUnique({
       where: {
         userId_postId: {
-          userId: session.user.id,
+          userId: session.user.id as string,
           postId: params.postId,
         },
       },
@@ -41,6 +40,19 @@ export async function POST(
       return new NextResponse("Post not found", { status: 404 });
     }
 
+    const like = await prisma.like.findUnique({
+      where: {
+        userId_postId: {
+          userId: session.user.id as string,
+          postId: params.postId,
+        },
+      },
+    });
+
+    if (like) {
+      return new NextResponse("Already liked", { status: 400 });
+    }
+
     await prisma.like.create({
       data: {
         user: {
@@ -52,17 +64,18 @@ export async function POST(
           connect: {
             id: params.postId
           }
-        },
+        }
       },
     });
 
-    // Create notification if the like is not on the user's own post
     if (post.userId !== session.user.id) {
-      await createNotification({
-        type: "LIKE",
-        userId: post.userId,
-        actorId: session.user.id,
-        postId: params.postId,
+      await prisma.notification.create({
+        data: {
+          type: "LIKE",
+          userId: post.userId,
+          actorId: session.user.id as string,
+          postId: params.postId,
+        }
       });
     }
 
@@ -86,7 +99,7 @@ export async function GET(
     const like = await prisma.like.findUnique({
       where: {
         userId_postId: {
-          userId: session.user.id,
+          userId: session.user.id as string,
           postId: params.postId,
         },
       },
