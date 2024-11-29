@@ -17,13 +17,13 @@ model Account {
   type                     String
   provider                 String
   providerAccountId        String
-  refresh_token           String?  @db.Text
+  refresh_token            String? @db.Text
   refresh_token_expires_in Int?
-  access_token            String?  @db.Text
+  access_token            String? @db.Text
   expires_at              Int?
-  token_type              String?
-  scope                   String?
-  id_token               String?  @db.Text
+  token_type             String?
+  scope                  String?
+  id_token               String? @db.Text
   session_state          String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -50,10 +50,11 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
-  coffeeLog     CoffeeLog[]
-  posts         Post[]
   logs          Log[]
-  
+  beans         Bean[]
+  brewMethods   BrewMethod[]
+  posts         Post[]
+  comments      Comment[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -66,39 +67,32 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model CoffeeLog {
-  id            String    @id @default(cuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  
-  roastName     String
-  origin        String?
-  roastLevel    String?
-  brewMethod    String?
-  tastingNotes  String?
-  rating        Float?
-  
-  isPublic      Boolean   @default(false)
-  
-  posts         Post[]
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+model Bean {
+  id          String   @id @default(cuid())
+  name        String
+  roastLevel  String
+  origin      String?
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs        Log[]
+
+  @@index([userId])
 }
 
-model Post {
-  id            String    @id @default(cuid())
-  title         String
-  content       String
-  
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  
-  coffeeLogId   String?
-  coffeeLog     CoffeeLog? @relation(fields: [coffeeLogId], references: [id])
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+model BrewMethod {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs        Log[]
+
+  @@index([userId])
 }
 
 model Log {
@@ -107,10 +101,11 @@ model Log {
   updatedAt   DateTime @updatedAt
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  beanName    String
-  roastLevel  String
+  beanId      String
+  bean        Bean     @relation(fields: [beanId], references: [id])
+  methodId    String
+  method      BrewMethod @relation(fields: [methodId], references: [id])
   grindSize   Int
-  brewMethod  String
   temperature Int
   ratio       String
   time        Int
@@ -118,4 +113,34 @@ model Log {
   rating      Int
 
   @@index([userId])
+  @@index([beanId])
+  @@index([methodId])
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  title       String
+  content     String    @db.Text
+  published   Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments    Comment[]
+
+  @@index([userId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([postId])
 }
