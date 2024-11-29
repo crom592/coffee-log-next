@@ -41,7 +41,10 @@ export async function GET(
                     select: {
                       id: true,
                       name: true,
-                      roaster: true,
+                      origin: true,
+                      process: true,
+                      roastLevel: true,
+                      roastedAt: true,
                     },
                   },
                   method: {
