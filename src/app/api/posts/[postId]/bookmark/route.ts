@@ -10,14 +10,14 @@ export async function POST(
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session) {
+    if (!session?.user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     const existingBookmark = await prisma.bookmark.findUnique({
       where: {
         userId_postId: {
-          userId: session.user.id,
+          userId: session.user.id as string,
           postId: params.postId,
         },
       },
@@ -34,7 +34,7 @@ export async function POST(
 
     const bookmark = await prisma.bookmark.create({
       data: {
-        userId: session.user.id,
+        userId: session.user.id as string,
         postId: params.postId,
       },
     });
@@ -53,14 +53,14 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session) {
+    if (!session?.user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     const bookmark = await prisma.bookmark.findUnique({
       where: {
         userId_postId: {
-          userId: session.user.id,
+          userId: session.user.id as string,
           postId: params.postId,
         },
       },
