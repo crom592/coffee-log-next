@@ -1,22 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['k.kakaocdn.net'],
+    domains: ['lh3.googleusercontent.com', 'k.kakaocdn.net'],
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'k.kakaocdn.net',
-        port: '',
-        pathname: '/**',
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '/a/**',
       },
       {
         protocol: 'https',
         hostname: 'k.kakaocdn.net',
-        port: '',
         pathname: '/**',
-      }
-    ]
-  }
+      },
+    ],
+  },
 }
 
 module.exports = nextConfig
