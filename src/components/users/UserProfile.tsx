@@ -3,6 +3,7 @@ import { useFollow } from "@/hooks/useSocial";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Link } from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Coffee, MessageSquare, Users } from "lucide-react";
 import { UserPosts } from "@/components/users/UserPosts";
@@ -35,12 +36,20 @@ export function UserProfile({ user, currentUser }: UserProfileProps) {
           <div>
             <h1 className="text-2xl font-bold">{user.name}</h1>
             <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
-              <div className="flex items-center">
+              <Link
+                href={`/users/${user.id}/follows`}
+                className="flex items-center hover:text-foreground transition-colors"
+              >
                 <Users className="h-4 w-4 mr-1" />
                 <span>{user._count.followers} followers</span>
-              </div>
+              </Link>
               <div>·</div>
-              <span>{user._count.following} following</span>
+              <Link
+                href={`/users/${user.id}/follows?tab=following`}
+                className="hover:text-foreground transition-colors"
+              >
+                <span>{user._count.following} following</span>
+              </Link>
             </div>
           </div>
         </div>
