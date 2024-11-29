@@ -10,13 +10,11 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session) {
+    if (!session?.user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const body = await request.json();
-    const { content } = body;
+    const { content } = await request.json();
 
     const post = await prisma.post.findUnique({
       where: { id: params.postId },
@@ -29,8 +27,16 @@ export async function POST(
 
     const comment = await prisma.comment.create({
       data: {
-        userId: session.user.id,
-        postId: params.postId,
+        user: {
+          connect: {
+            id: session.user.id
+          }
+        },
+        post: {
+          connect: {
+            id: params.postId
+          }
+        },
         content,
       },
       include: {
@@ -44,19 +50,20 @@ export async function POST(
       },
     });
 
-    // Create notification
-    await createNotification({
-      type: "COMMENT",
-      userId: post.userId,
-      actorId: session.user.id,
-      postId: params.postId,
-      commentId: comment.id,
-    });
+    // Create notification if the comment is not on the user's own post
+    if (post.userId !== session.user.id) {
+      await createNotification({
+        type: "COMMENT",
+        userId: post.userId,
+        actorId: session.user.id,
+        postId: params.postId,
+      });
+    }
 
     return NextResponse.json(comment);
   } catch (error) {
-    console.error("[COMMENTS_POST]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.error(error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
 
@@ -66,8 +73,8 @@ export async function GET(
 ) {
   try {
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
+    const page = parseInt(searchParams.get("page") ?? "1");
+    const limit = parseInt(searchParams.get("limit") ?? "20");
     const skip = (page - 1) * limit;
 
     const [comments, total] = await Promise.all([
@@ -85,7 +92,7 @@ export async function GET(
           },
         },
         orderBy: {
-          createdAt: "asc",
+          createdAt: "desc",
         },
         skip,
         take: limit,
@@ -100,11 +107,10 @@ export async function GET(
     return NextResponse.json({
       comments,
       total,
-      page,
-      totalPages: Math.ceil(total / limit),
+      hasMore: skip + comments.length < total,
     });
   } catch (error) {
-    console.error("[COMMENTS_GET]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.error(error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
