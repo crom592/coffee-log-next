@@ -33,18 +33,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
     const beans = await prisma.bean.findMany({
-      where: {
-        userId: session.user.id,
-      },
       include: {
         user: {
           select: {
@@ -60,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(beans);
   } catch (error) {
-    console.error("[BEANS_GET]", error);
+    console.error(error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
