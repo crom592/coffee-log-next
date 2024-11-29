@@ -11,7 +11,7 @@ import Header from "@/components/Header";
 
 export default function CommunityPage() {
   const { data: session } = useSession();
-  const { posts, total, totalPages, currentPage, setPage, isLoading } = usePosts();
+  const { posts, totalPages, currentPage, setPage, isLoading } = usePosts();
 
   return (
     <div>

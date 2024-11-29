@@ -13,23 +13,9 @@ export function FollowTabs({
   followerCount,
   followingCount,
 }: FollowTabsProps) {
-  const {
-    followers,
-    isEmpty: isFollowersEmpty,
-    hasMore: hasMoreFollowers,
-    isLoading: isLoadingFollowers,
-    isLoadingMore: isLoadingMoreFollowers,
-    loadMore: loadMoreFollowers,
-  } = useFollowers(userId);
+  const { followers, hasNextFollowersPage, loadMoreFollowers } = useFollowers(userId);
 
-  const {
-    following,
-    isEmpty: isFollowingEmpty,
-    hasMore: hasMoreFollowing,
-    isLoading: isLoadingFollowing,
-    isLoadingMore: isLoadingMoreFollowing,
-    loadMore: loadMoreFollowing,
-  } = useFollowing(userId);
+  const { following, hasNextFollowingPage, loadMoreFollowing } = useFollowing(userId);
 
   return (
     <Tabs defaultValue="followers" className="space-y-4">
@@ -44,9 +30,9 @@ export function FollowTabs({
       <TabsContent value="followers">
         <UserList
           users={followers}
-          isLoading={isLoadingFollowers}
-          isLoadingMore={isLoadingMoreFollowers}
-          hasMore={hasMoreFollowers}
+          isLoading={false}
+          isLoadingMore={false}
+          hasMore={hasNextFollowersPage}
           onLoadMore={loadMoreFollowers}
           emptyMessage="아직 팔로워가 없습니다"
         />
@@ -54,9 +40,9 @@ export function FollowTabs({
       <TabsContent value="following">
         <UserList
           users={following}
-          isLoading={isLoadingFollowing}
-          isLoadingMore={isLoadingMoreFollowing}
-          hasMore={hasMoreFollowing}
+          isLoading={false}
+          isLoadingMore={false}
+          hasMore={hasNextFollowingPage}
           onLoadMore={loadMoreFollowing}
           emptyMessage="아직 팔로우하는 사용자가 없습니다"
         />

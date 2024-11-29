@@ -1,9 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FollowTabs } from "@/components/users/FollowTabs";
 
 interface FollowsPageProps {
@@ -32,7 +29,6 @@ export async function generateMetadata({
 }
 
 export default async function FollowsPage({ params }: FollowsPageProps) {
-  const session = await getServerSession(authOptions);
   const user = await prisma.user.findUnique({
     where: { id: params.userId },
     select: {

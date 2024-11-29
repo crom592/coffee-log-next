@@ -41,11 +41,11 @@ export async function POST(
       return new NextResponse("Post not found", { status: 404 });
     }
 
-    const like = await prisma.like.create({
+    await prisma.like.create({
       data: {
         user: {
           connect: {
-            id: session.user.id
+            id: session.user.id as string
           }
         },
         post: {

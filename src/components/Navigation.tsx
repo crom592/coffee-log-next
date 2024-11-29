@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
-import { Coffee, LogOut, User, Bookmark, Bell } from 'lucide-react'
+import { Coffee, LogOut, User } from 'lucide-react'
 
 export default function Navigation() {
   const { data: session } = useSession()

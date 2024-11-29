@@ -24,7 +24,6 @@ export function CommentList({ postId }: CommentListProps) {
   const { data: session } = useSession();
   const {
     comments,
-    total,
     totalPages,
     currentPage,
     setPage,
@@ -48,7 +47,7 @@ export function CommentList({ postId }: CommentListProps) {
       await createComment(newComment);
       setNewComment("");
       toast.success("Comment posted successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to post comment");
     } finally {
       setIsSubmitting(false);
@@ -63,7 +62,7 @@ export function CommentList({ postId }: CommentListProps) {
       await updateComment(commentId, editContent);
       setEditingComment(null);
       toast.success("Comment updated successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to update comment");
     } finally {
       setIsSubmitting(false);
@@ -74,7 +73,7 @@ export function CommentList({ postId }: CommentListProps) {
     try {
       await deleteComment(commentId);
       toast.success("Comment deleted successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete comment");
     }
   };

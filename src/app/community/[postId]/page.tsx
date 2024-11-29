@@ -24,7 +24,7 @@ import Header from "@/components/Header";
 export default function PostPage({ params }: { params: { postId: string } }) {
   const router = useRouter();
   const { data: session } = useSession();
-  const { post, isLoading, error, updatePost, deletePost } = usePost(params.postId);
+  const { post, isLoading, updatePost, deletePost } = usePost(params.postId);
   const [isEditing, setIsEditing] = useState(false);
 
   if (isLoading) {
@@ -40,7 +40,7 @@ export default function PostPage({ params }: { params: { postId: string } }) {
     );
   }
 
-  if (error || !post) {
+  if (!post) {
     return (
       <div>
         <Header />
