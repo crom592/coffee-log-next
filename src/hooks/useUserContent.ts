@@ -1,4 +1,4 @@
-import useSWRInfinite from "swr/infinite";
+import { useSWRInfinite } from "swr/infinite";
 import { PostWithRelations } from "@/types/community";
 import { Log } from "@prisma/client";
 

@@ -19,16 +19,20 @@ export async function POST(request: NextRequest) {
             id: session.user.id
           }
         },
-        bean: beanId ? {
-          connect: {
-            id: beanId
+        ...(beanId && {
+          bean: {
+            connect: {
+              id: beanId
+            }
           }
-        } : undefined,
-        method: methodId ? {
-          connect: {
-            id: methodId
+        }),
+        ...(methodId && {
+          method: {
+            connect: {
+              id: methodId
+            }
           }
-        } : undefined,
+        }),
         grindSize,
         temperature,
         ratio,
