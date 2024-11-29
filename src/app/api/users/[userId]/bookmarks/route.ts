@@ -42,9 +42,7 @@ export async function GET(
                       id: true,
                       name: true,
                       origin: true,
-                      process: true,
-                      roastLevel: true,
-                      roastedAt: true,
+                      roaster: true,
                     },
                   },
                   method: {

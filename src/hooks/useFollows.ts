@@ -1,4 +1,4 @@
-import { useSWRInfinite } from 'swr/infinite';
+import useSWRInfinite from 'swr/infinite';
 import { User } from "@prisma/client";
 
 interface UserWithFollowCounts extends Pick<User, "id" | "name" | "image"> {

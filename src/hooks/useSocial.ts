@@ -1,4 +1,4 @@
-import { useSWR } from 'swr';
+import useSWR from 'swr';
 import { toast } from "sonner";
 
 export function useLike(postId: string) {
