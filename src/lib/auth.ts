@@ -57,18 +57,16 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Allows relative callback URLs
-      if (url.startsWith("/")) {
-        return `${baseUrl}${url}`
+      if (url.includes('/auth/error')) {
+        return `${baseUrl}/auth/signin?error=AuthError`
       }
-      // Allow callbacks to specified URLs
-      else if (url.startsWith(baseUrl)) {
+      if (url.startsWith('/auth/signin')) {
         return url
       }
       return '/auth/success'
     }
   },
-  debug: process.env.NODE_ENV === "development",
+  debug: true, // Enable debug logs
 }
 
 declare module 'next-auth' {
