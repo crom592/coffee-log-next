@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Coffee, MessageSquare, Users } from "lucide-react";
+import { UserPosts } from "@/components/users/UserPosts";
+import { UserLogs } from "@/components/users/UserLogs";
 
 interface UserProfileProps {
   user: User & {
@@ -64,10 +66,10 @@ export function UserProfile({ user, currentUser }: UserProfileProps) {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="posts">
-          {/* TODO: Add user's posts */}
+          <UserPosts userId={user.id} />
         </TabsContent>
         <TabsContent value="logs">
-          {/* TODO: Add user's logs */}
+          <UserLogs userId={user.id} />
         </TabsContent>
       </Tabs>
     </Card>
