@@ -12,7 +12,9 @@ if (!process.env.NEXTAUTH_SECRET) {
   throw new Error("Missing NEXTAUTH_SECRET environment variable")
 }
 
-const providers = [
+const providers = []
+
+providers.push(
   KakaoProvider({
     clientId: process.env.KAKAO_CLIENT_ID,
     clientSecret: process.env.KAKAO_CLIENT_SECRET,
@@ -21,8 +23,8 @@ const providers = [
         scope: "profile_nickname profile_image"
       }
     }
-  }),
-]
+  })
+)
 
 // Add Google provider only if credentials are available
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
