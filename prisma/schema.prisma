@@ -59,6 +59,8 @@ model User {
   bookmarks     Bookmark[]
   followers     Follow[]    @relation("UserFollowers")
   following     Follow[]    @relation("UserFollowing")
+  notifications Notification[] @relation("UserNotifications")
+  actions       Notification[] @relation("UserActions")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -136,6 +138,7 @@ model Post {
   comments    Comment[]
   likes       Like[]
   bookmarks   Bookmark[]
+  notifications Notification[]
 
   @@index([userId])
   @@index([logId])
@@ -147,9 +150,10 @@ model Comment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   postId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+  notifications Notification[]
 
   @@index([userId])
   @@index([postId])
@@ -192,4 +196,30 @@ model Follow {
   @@unique([followerId, followingId])
   @@index([followerId])
   @@index([followingId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      NotificationType
+  userId    String
+  actorId   String
+  postId    String?
+  commentId String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  actor     User     @relation("UserActions", fields: [actorId], references: [id], onDelete: Cascade)
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([actorId])
+  @@index([postId])
+  @@index([commentId])
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  FOLLOW
 }

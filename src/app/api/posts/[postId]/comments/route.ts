@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { createNotification } from "@/lib/notifications";
 
 export async function POST(
   request: NextRequest,
@@ -16,6 +17,15 @@ export async function POST(
 
     const body = await request.json();
     const { content } = body;
+
+    const post = await prisma.post.findUnique({
+      where: { id: params.postId },
+      select: { userId: true },
+    });
+
+    if (!post) {
+      return new NextResponse("Post not found", { status: 404 });
+    }
 
     const comment = await prisma.comment.create({
       data: {
@@ -32,6 +42,15 @@ export async function POST(
           },
         },
       },
+    });
+
+    // Create notification
+    await createNotification({
+      type: "COMMENT",
+      userId: post.userId,
+      actorId: session.user.id,
+      postId: params.postId,
+      commentId: comment.id,
     });
 
     return NextResponse.json(comment);
