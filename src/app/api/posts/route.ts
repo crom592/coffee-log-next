@@ -6,20 +6,26 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session) {
+    if (!session?.user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const body = await request.json();
-    const { title, content, logId } = body;
+    const { title, content, logId } = await request.json();
 
     const post = await prisma.post.create({
       data: {
-        userId: session.user.id,
+        user: {
+          connect: {
+            id: session.user.id
+          }
+        },
         title,
         content,
-        logId,
+        log: logId ? {
+          connect: {
+            id: logId
+          }
+        } : undefined,
       },
       include: {
         user: {
@@ -29,10 +35,12 @@ export async function POST(request: NextRequest) {
             image: true,
           },
         },
-        log: {
-          include: {
-            bean: true,
-            method: true,
+        log: true,
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+            bookmarks: true,
           },
         },
       },
@@ -40,28 +48,25 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(post);
   } catch (error) {
-    console.error("[POSTS_POST]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.error(error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
-    const logId = searchParams.get("logId");
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
+    const page = parseInt(searchParams.get("page") ?? "1");
+    const limit = parseInt(searchParams.get("limit") ?? "20");
     const skip = (page - 1) * limit;
-
-    const where = {
-      ...(userId && { userId }),
-      ...(logId && { logId }),
-    };
 
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
-        where,
+        skip,
+        take: limit,
+        orderBy: {
+          createdAt: "desc",
+        },
         include: {
           user: {
             select: {
@@ -70,35 +75,26 @@ export async function GET(request: NextRequest) {
               image: true,
             },
           },
-          log: {
-            include: {
-              bean: true,
-              method: true,
-            },
-          },
+          log: true,
           _count: {
             select: {
+              likes: true,
               comments: true,
+              bookmarks: true,
             },
           },
         },
-        orderBy: {
-          createdAt: "desc",
-        },
-        skip,
-        take: limit,
       }),
-      prisma.post.count({ where }),
+      prisma.post.count(),
     ]);
 
     return NextResponse.json({
       posts,
       total,
-      page,
-      totalPages: Math.ceil(total / limit),
+      hasMore: skip + posts.length < total,
     });
   } catch (error) {
-    console.error("[POSTS_GET]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.error(error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
