@@ -11,6 +11,16 @@ export async function GET(
     const limit = parseInt(searchParams.get("limit") ?? "20");
     const skip = (page - 1) * limit;
 
+    // Check if user exists
+    const user = await prisma.user.findUnique({
+      where: { id: params.userId },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return new NextResponse("User not found", { status: 404 });
+    }
+
     const [following, total] = await Promise.all([
       prisma.follow.findMany({
         where: {
@@ -45,12 +55,15 @@ export async function GET(
     ]);
 
     return NextResponse.json({
-      following: following.map((f) => f.following),
+      following: following.map((f) => ({
+        ...f.following,
+        followedAt: f.createdAt,
+      })),
       total,
       hasMore: skip + following.length < total,
     });
   } catch (error) {
-    console.error("[USER_FOLLOWING_GET]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.error(error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
