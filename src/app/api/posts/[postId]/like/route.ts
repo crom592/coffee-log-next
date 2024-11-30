@@ -2,22 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createNotification } from "@/lib/notifications";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
-) {
+function getPostId(request: NextRequest): string {
+  const segments = request.nextUrl.pathname.split('/');
+  return segments[segments.length - 2] || ''; // Get postId from /api/posts/[postId]/like
+}
+
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const postId = getPostId(request);
     const existingLike = await prisma.like.findUnique({
       where: {
         userId_postId: {
-          userId: session.user.id as string,
-          postId: params.postId,
+          userId: session.user.id,
+          postId,
         },
       },
     });
@@ -28,11 +32,11 @@ export async function POST(
           id: existingLike.id,
         },
       });
-      return NextResponse.json({ liked: false });
+      return new NextResponse(null, { status: 204 });
     }
 
     const post = await prisma.post.findUnique({
-      where: { id: params.postId },
+      where: { id: postId },
       select: { userId: true },
     });
 
@@ -40,81 +44,59 @@ export async function POST(
       return new NextResponse("Post not found", { status: 404 });
     }
 
-    const like = await prisma.like.findUnique({
-      where: {
-        userId_postId: {
-          userId: session.user.id as string,
-          postId: params.postId,
-        },
-      },
-    });
-
-    if (like) {
-      return new NextResponse("Already liked", { status: 400 });
-    }
-
-    await prisma.like.create({
+    const like = await prisma.like.create({
       data: {
+        userId: session.user.id,
+        postId,
+      },
+      include: {
         user: {
-          connect: {
-            id: session.user.id as string
-          }
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
         },
-        post: {
-          connect: {
-            id: params.postId
-          }
-        }
       },
     });
 
+    // Create notification
     if (post.userId !== session.user.id) {
-      await prisma.notification.create({
-        data: {
-          type: "LIKE",
-          userId: post.userId,
-          actorId: session.user.id as string,
-          postId: params.postId,
-        }
+      await createNotification({
+        userId: post.userId,
+        type: "LIKE",
+        actorId: session.user.id,
+        postId,
       });
     }
 
-    return NextResponse.json({ liked: true });
+    return NextResponse.json(like);
   } catch (error) {
-    console.error(error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    console.error("[LIKE_POST]", error);
+    return new NextResponse("Internal error", { status: 500 });
   }
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
-) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const postId = getPostId(request);
     const like = await prisma.like.findUnique({
       where: {
         userId_postId: {
-          userId: session.user.id as string,
-          postId: params.postId,
+          userId: session.user.id,
+          postId,
         },
       },
     });
 
-    return NextResponse.json({
-      liked: !!like,
-      count: await prisma.like.count({
-        where: {
-          postId: params.postId,
-        },
-      }),
-    });
+    return NextResponse.json({ liked: !!like });
   } catch (error) {
-    console.error(error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    console.error("[LIKE_GET]", error);
+    return new NextResponse("Internal error", { status: 500 });
   }
 }

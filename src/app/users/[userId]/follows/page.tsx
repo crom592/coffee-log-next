@@ -1,19 +1,15 @@
-import { Metadata } from "next";
+import { Metadata, PageProps } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { FollowTabs } from "@/components/users/FollowTabs";
 
-interface FollowsPageProps {
-  params: {
-    userId: string;
-  };
-}
-
 export async function generateMetadata({
   params,
-}: FollowsPageProps): Promise<Metadata> {
+}: PageProps): Promise<Metadata> {
+  const userId = params.userId as string;
+
   const user = await prisma.user.findUnique({
-    where: { id: params.userId },
+    where: { id: userId },
   });
 
   if (!user) {
@@ -28,9 +24,14 @@ export async function generateMetadata({
   };
 }
 
-export default async function FollowsPage({ params }: FollowsPageProps) {
+export default async function FollowsPage({
+  params,
+  searchParams,
+}: PageProps) {
+  const userId = params.userId as string;
+
   const user = await prisma.user.findUnique({
-    where: { id: params.userId },
+    where: { id: userId },
     select: {
       id: true,
       name: true,

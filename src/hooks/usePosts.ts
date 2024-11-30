@@ -1,20 +1,37 @@
 import { useState } from "react";
-import useSWR from "swr";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PostWithRelations, PaginatedResponse } from "@/types/community";
 
 const POSTS_PER_PAGE = 10;
 
 export function usePosts(userId?: string, logId?: string) {
   const [page, setPage] = useState(1);
+  const queryClient = useQueryClient();
+  const queryKey = ["posts", { page, userId, logId }];
 
-  const { data, error, isLoading, mutate } = useSWR<PaginatedResponse<PostWithRelations>>(
-    `/api/posts?page=${page}&limit=${POSTS_PER_PAGE}${userId ? `&userId=${userId}` : ""}${
-      logId ? `&logId=${logId}` : ""
-    }`
-  );
+  const { data, error, isLoading } = useQuery<PaginatedResponse<PostWithRelations>>({
+    queryKey,
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/posts?page=${page}&limit=${POSTS_PER_PAGE}${userId ? `&userId=${userId}` : ""}${
+          logId ? `&logId=${logId}` : ""
+        }`
+      );
+      if (!response.ok) throw new Error("Failed to fetch posts");
+      return response.json();
+    },
+  });
 
-  const createPost = async (title: string, content: string, logId: string | null = null) => {
-    try {
+  const createPostMutation = useMutation({
+    mutationFn: async ({
+      title,
+      content,
+      logId,
+    }: {
+      title: string;
+      content: string;
+      logId: string | null;
+    }) => {
       const response = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -22,14 +39,18 @@ export function usePosts(userId?: string, logId?: string) {
       });
 
       if (!response.ok) throw new Error("Failed to create post");
-
-      const post = await response.json();
-      mutate();
-      return post;
-    } catch (error) {
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+    onError: (error) => {
       console.error("Error creating post:", error);
-      throw error;
-    }
+    },
+  });
+
+  const createPost = async (title: string, content: string, logId: string | null = null) => {
+    return createPostMutation.mutateAsync({ title, content, logId });
   };
 
   return {
@@ -41,17 +62,32 @@ export function usePosts(userId?: string, logId?: string) {
     isLoading,
     error,
     createPost,
-    mutate,
   };
 }
 
 export function usePost(postId: string) {
-  const { data: post, error, isLoading, mutate } = useSWR<PostWithRelations>(
-    `/api/posts/${postId}`
-  );
+  const queryClient = useQueryClient();
+  const queryKey = ["post", postId];
 
-  const updatePost = async (title: string, content: string, logId: string | null = null) => {
-    try {
+  const { data: post, error, isLoading } = useQuery<PostWithRelations>({
+    queryKey,
+    queryFn: async () => {
+      const response = await fetch(`/api/posts/${postId}`);
+      if (!response.ok) throw new Error("Failed to fetch post");
+      return response.json();
+    },
+  });
+
+  const updatePostMutation = useMutation({
+    mutationFn: async ({
+      title,
+      content,
+      logId,
+    }: {
+      title: string;
+      content: string;
+      logId: string | null;
+    }) => {
       const response = await fetch(`/api/posts/${postId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -59,29 +95,39 @@ export function usePost(postId: string) {
       });
 
       if (!response.ok) throw new Error("Failed to update post");
-
-      const updatedPost = await response.json();
-      mutate(updatedPost);
-      return updatedPost;
-    } catch (error) {
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(queryKey, data);
+    },
+    onError: (error) => {
       console.error("Error updating post:", error);
-      throw error;
-    }
-  };
+    },
+  });
 
-  const deletePost = async () => {
-    try {
+  const deletePostMutation = useMutation({
+    mutationFn: async () => {
       const response = await fetch(`/api/posts/${postId}`, {
         method: "DELETE",
       });
 
       if (!response.ok) throw new Error("Failed to delete post");
-
-      mutate(undefined);
-    } catch (error) {
+    },
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+    onError: (error) => {
       console.error("Error deleting post:", error);
-      throw error;
-    }
+    },
+  });
+
+  const updatePost = async (title: string, content: string, logId: string | null = null) => {
+    return updatePostMutation.mutateAsync({ title, content, logId });
+  };
+
+  const deletePost = async () => {
+    return deletePostMutation.mutateAsync();
   };
 
   return {
@@ -90,6 +136,5 @@ export function usePost(postId: string) {
     error,
     updatePost,
     deletePost,
-    mutate,
   };
 }

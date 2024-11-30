@@ -15,6 +15,7 @@ export type PostWithRelations = {
   } & Log;
   _count?: {
     comments: number;
+    likes: number;
   };
 };
 

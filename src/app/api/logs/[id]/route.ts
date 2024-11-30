@@ -1,12 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+function getLogId(request: NextRequest): string {
+  return request.nextUrl.pathname.split('/').pop() || '';
+}
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
 
@@ -14,9 +16,10 @@ export async function GET(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const id = getLogId(request);
     const log = await prisma.log.findUnique({
       where: {
-        id: params.id,
+        id,
       },
       include: {
         bean: true,
@@ -42,10 +45,7 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
 
@@ -53,12 +53,13 @@ export async function PATCH(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const id = getLogId(request);
     const body = await request.json();
     const { beanId, methodId, grindSize, temperature, ratio, time, notes, rating } = body;
 
     const log = await prisma.log.update({
       where: {
-        id: params.id,
+        id,
       },
       data: {
         beanId,
@@ -70,10 +71,6 @@ export async function PATCH(
         notes,
         rating,
       },
-      include: {
-        bean: true,
-        method: true,
-      },
     });
 
     return NextResponse.json(log);
@@ -83,10 +80,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
 
@@ -94,13 +88,14 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const log = await prisma.log.delete({
+    const id = getLogId(request);
+    await prisma.log.delete({
       where: {
-        id: params.id,
+        id,
       },
     });
 
-    return NextResponse.json(log);
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error("[LOG_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });

@@ -1,18 +1,25 @@
 import { useState } from "react";
-import useSWR from "swr";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CommentWithUser, PaginatedResponse } from "@/types/community";
 
 const COMMENTS_PER_PAGE = 20;
 
 export function useComments(postId: string) {
   const [page, setPage] = useState(1);
+  const queryClient = useQueryClient();
+  const queryKey = ["comments", postId, page];
 
-  const { data, error, isLoading, mutate } = useSWR<PaginatedResponse<CommentWithUser>>(
-    `/api/posts/${postId}/comments?page=${page}&limit=${COMMENTS_PER_PAGE}`
-  );
+  const { data, error, isLoading } = useQuery<PaginatedResponse<CommentWithUser>>({
+    queryKey,
+    queryFn: async () => {
+      const response = await fetch(`/api/posts/${postId}/comments?page=${page}&limit=${COMMENTS_PER_PAGE}`);
+      if (!response.ok) throw new Error("Failed to fetch comments");
+      return response.json();
+    },
+  });
 
-  const createComment = async (content: string) => {
-    try {
+  const createCommentMutation = useMutation({
+    mutationFn: async (content: string) => {
       const response = await fetch(`/api/posts/${postId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -20,18 +27,18 @@ export function useComments(postId: string) {
       });
 
       if (!response.ok) throw new Error("Failed to create comment");
-
-      const comment = await response.json();
-      mutate();
-      return comment;
-    } catch (error) {
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+    },
+    onError: (error) => {
       console.error("Error creating comment:", error);
-      throw error;
-    }
-  };
+    },
+  });
 
-  const updateComment = async (commentId: string, content: string) => {
-    try {
+  const updateCommentMutation = useMutation({
+    mutationFn: async ({ commentId, content }: { commentId: string; content: string }) => {
       const response = await fetch(`/api/posts/${postId}/comments/${commentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -39,29 +46,42 @@ export function useComments(postId: string) {
       });
 
       if (!response.ok) throw new Error("Failed to update comment");
-
-      const updatedComment = await response.json();
-      mutate();
-      return updatedComment;
-    } catch (error) {
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+    },
+    onError: (error) => {
       console.error("Error updating comment:", error);
-      throw error;
-    }
-  };
+    },
+  });
 
-  const deleteComment = async (commentId: string) => {
-    try {
+  const deleteCommentMutation = useMutation({
+    mutationFn: async (commentId: string) => {
       const response = await fetch(`/api/posts/${postId}/comments/${commentId}`, {
         method: "DELETE",
       });
 
       if (!response.ok) throw new Error("Failed to delete comment");
-
-      mutate();
-    } catch (error) {
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+    },
+    onError: (error) => {
       console.error("Error deleting comment:", error);
-      throw error;
-    }
+    },
+  });
+
+  const createComment = async (content: string) => {
+    return createCommentMutation.mutateAsync(content);
+  };
+
+  const updateComment = async (commentId: string, content: string) => {
+    return updateCommentMutation.mutateAsync({ commentId, content });
+  };
+
+  const deleteComment = async (commentId: string) => {
+    return deleteCommentMutation.mutateAsync(commentId);
   };
 
   return {
@@ -75,6 +95,5 @@ export function useComments(postId: string) {
     createComment,
     updateComment,
     deleteComment,
-    mutate,
   };
 }

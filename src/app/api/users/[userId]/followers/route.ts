@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+function getUserId(request: NextRequest): string {
+  const segments = request.nextUrl.pathname.split('/');
+  return segments[segments.length - 2] || ''; // Get userId from /api/users/[userId]/followers
+}
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    const userId = getUserId(request);
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") ?? "1");
     const limit = parseInt(searchParams.get("limit") ?? "20");
@@ -14,7 +17,7 @@ export async function GET(
     const [followers, total] = await Promise.all([
       prisma.follow.findMany({
         where: {
-          followingId: params.userId,
+          followingId: userId,
         },
         include: {
           follower: {
@@ -22,35 +25,30 @@ export async function GET(
               id: true,
               name: true,
               image: true,
-              _count: {
-                select: {
-                  followers: true,
-                  following: true,
-                },
-              },
             },
           },
         },
         orderBy: {
           createdAt: "desc",
         },
-        skip,
         take: limit,
+        skip,
       }),
       prisma.follow.count({
         where: {
-          followingId: params.userId,
+          followingId: userId,
         },
       }),
     ]);
 
     return NextResponse.json({
-      followers: followers.map((f) => f.follower),
+      followers: followers.map((follow) => follow.follower),
       total,
-      hasMore: skip + followers.length < total,
+      page,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error("[USER_FOLLOWERS_GET]", error);
+    console.error("[FOLLOWERS_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

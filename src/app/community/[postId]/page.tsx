@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { formatDistanceToNow } from "date-fns";
 import { usePost } from "@/hooks/usePosts";
@@ -20,11 +20,40 @@ import {
 import { Loader2, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
+import { Metadata, PageProps } from "next";
 
-export default function PostPage({ params }: { params: { postId: string } }) {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const postId = params.postId as string;
+
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+    include: {
+      user: true,
+    },
+  });
+
+  if (!post) {
+    return {
+      title: "게시글을 찾을 수 없습니다",
+    };
+  }
+
+  return {
+    title: post.title,
+  };
+}
+
+export default async function PostPage({
+  params,
+  searchParams,
+}: PageProps) {
+  const postId = params.postId as string;
+
   const router = useRouter();
   const { data: session } = useSession();
-  const { post, isLoading, updatePost, deletePost } = usePost(params.postId);
+  const { post, isLoading, updatePost, deletePost } = usePost(postId);
   const [isEditing, setIsEditing] = useState(false);
 
   if (isLoading) {
@@ -152,7 +181,16 @@ export default function PostPage({ params }: { params: { postId: string } }) {
 
             {post.log && (
               <div className="mt-8">
-                <LogCard log={post.log} />
+                {(() => {
+                  const log = {
+                    ...post.log,
+                    bean: {
+                      ...post.log.bean,
+                      origin: post.log.bean.origin || "", // Default to empty string if null
+                    },
+                  };
+                  return <LogCard log={log} />;
+                })()}
               </div>
             )}
 

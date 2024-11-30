@@ -3,14 +3,17 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+function getUserId(request: NextRequest): string {
+  const segments = request.nextUrl.pathname.split('/');
+  return segments[segments.length - 2] || ''; // Get userId from /api/users/[userId]/bookmarks
+}
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
+    const userId = getUserId(request);
 
-    if (!session || session.user.id !== params.userId) {
+    if (!session || session.user.id !== userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -22,7 +25,7 @@ export async function GET(
     const [bookmarks, total] = await Promise.all([
       prisma.bookmark.findMany({
         where: {
-          userId: params.userId,
+          userId,
         },
         include: {
           post: {
@@ -34,29 +37,11 @@ export async function GET(
                   image: true,
                 },
               },
-              log: {
-                select: {
-                  id: true,
-                  bean: {
-                    select: {
-                      id: true,
-                      name: true,
-                      origin: true,
-                    },
-                  },
-                  method: {
-                    select: {
-                      id: true,
-                      name: true,
-                    },
-                  },
-                  rating: true,
-                },
-              },
               _count: {
                 select: {
                   comments: true,
                   likes: true,
+                  bookmarks: true,
                 },
               },
             },
@@ -65,23 +50,24 @@ export async function GET(
         orderBy: {
           createdAt: "desc",
         },
-        skip,
         take: limit,
+        skip,
       }),
       prisma.bookmark.count({
         where: {
-          userId: params.userId,
+          userId,
         },
       }),
     ]);
 
     return NextResponse.json({
-      posts: bookmarks.map((b) => b.post),
+      bookmarks: bookmarks.map((bookmark) => bookmark.post),
       total,
-      hasMore: skip + bookmarks.length < total,
+      page,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error("[USER_BOOKMARKS_GET]", error);
+    console.error("[BOOKMARKS_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

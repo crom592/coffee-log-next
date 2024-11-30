@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+function getUserId(request: NextRequest): string {
+  const segments = request.nextUrl.pathname.split('/');
+  return segments[segments.length - 2] || ''; // Get userId from /api/users/[userId]/following
+}
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    const userId = getUserId(request);
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") ?? "1");
     const limit = parseInt(searchParams.get("limit") ?? "20");
@@ -13,7 +16,7 @@ export async function GET(
 
     // Check if user exists
     const user = await prisma.user.findUnique({
-      where: { id: params.userId },
+      where: { id: userId },
       select: { id: true },
     });
 
@@ -24,7 +27,7 @@ export async function GET(
     const [following, total] = await Promise.all([
       prisma.follow.findMany({
         where: {
-          followerId: params.userId,
+          followerId: userId,
         },
         include: {
           following: {
@@ -49,7 +52,7 @@ export async function GET(
       }),
       prisma.follow.count({
         where: {
-          followerId: params.userId,
+          followerId: userId,
         },
       }),
     ]);
@@ -63,7 +66,7 @@ export async function GET(
       hasMore: skip + following.length < total,
     });
   } catch (error) {
-    console.error(error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    console.error("[FOLLOWING_GET]", error);
+    return new NextResponse("Internal error", { status: 500 });
   }
 }

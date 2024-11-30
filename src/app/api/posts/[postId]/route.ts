@@ -3,14 +3,17 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
-) {
+function getPostId(request: NextRequest): string {
+  const segments = request.nextUrl.pathname.split('/');
+  return segments[segments.length - 1] || ''; // Get postId from /api/posts/[postId]
+}
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    const postId = getPostId(request);
     const post = await prisma.post.findUnique({
       where: {
-        id: params.postId,
+        id: postId,
       },
       include: {
         user: {
@@ -26,18 +29,11 @@ export async function GET(
             method: true,
           },
         },
-        comments: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-              },
-            },
-          },
-          orderBy: {
-            createdAt: "asc",
+        _count: {
+          select: {
+            comments: true,
+            likes: true,
+            bookmarks: true,
           },
         },
       },
@@ -54,10 +50,7 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
-) {
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
 
@@ -65,9 +58,10 @@ export async function PATCH(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const postId = getPostId(request);
     const post = await prisma.post.findUnique({
       where: {
-        id: params.postId,
+        id: postId,
       },
     });
 
@@ -80,15 +74,12 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { title, content } = body;
-
     const updatedPost = await prisma.post.update({
       where: {
-        id: params.postId,
+        id: postId,
       },
       data: {
-        title,
-        content,
+        content: body.content,
       },
       include: {
         user: {
@@ -104,6 +95,13 @@ export async function PATCH(
             method: true,
           },
         },
+        _count: {
+          select: {
+            comments: true,
+            likes: true,
+            bookmarks: true,
+          },
+        },
       },
     });
 
@@ -114,10 +112,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
-) {
+export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
 
@@ -125,9 +120,10 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const postId = getPostId(request);
     const post = await prisma.post.findUnique({
       where: {
-        id: params.postId,
+        id: postId,
       },
     });
 
@@ -141,7 +137,7 @@ export async function DELETE(
 
     await prisma.post.delete({
       where: {
-        id: params.postId,
+        id: postId,
       },
     });
 

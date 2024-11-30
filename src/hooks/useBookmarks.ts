@@ -1,4 +1,4 @@
-import useSWRInfinite from "swr/infinite";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { PostWithRelations } from "@/types/community";
 
 interface BookmarksResponse {
@@ -10,30 +10,42 @@ interface BookmarksResponse {
 const PAGE_SIZE = 10;
 
 export function useBookmarks(userId: string) {
-  const getKey = (pageIndex: number) =>
-    `/api/users/${userId}/bookmarks?page=${pageIndex + 1}&limit=${PAGE_SIZE}`;
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery<BookmarksResponse>({
+    queryKey: ["bookmarks", userId],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await fetch(
+        `/api/users/${userId}/bookmarks?page=${pageParam}&limit=${PAGE_SIZE}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch bookmarks");
+      return response.json();
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (!lastPage.hasMore) return undefined;
+      return pages.length + 1;
+    },
+  });
 
-  const { data, error, size, setSize, isLoading, isValidating, mutate } =
-    useSWRInfinite<BookmarksResponse>(getKey);
-
-  const posts = data ? data.flatMap((page) => page.posts) : [];
-  const total = data?.[0]?.total ?? 0;
-  const hasMore = data ? data[data.length - 1]?.hasMore : true;
+  const posts = data?.pages.flatMap((page) => page.posts) ?? [];
+  const total = data?.pages[0]?.total ?? 0;
   const isEmpty = posts.length === 0;
-  const isLoadingMore =
-    isLoading || (size > 0 && data && typeof data[size - 1] === "undefined");
-  const isRefreshing = isValidating && data && data.length === size;
 
   return {
     posts,
     total,
     error,
     isEmpty,
-    hasMore,
-    isLoading,
-    isLoadingMore,
-    isRefreshing,
-    loadMore: () => setSize(size + 1),
-    mutate,
+    hasMore: hasNextPage,
+    isLoading: status === "loading",
+    isLoadingMore: isFetchingNextPage,
+    isRefreshing: isFetching && !isFetchingNextPage,
+    loadMore: fetchNextPage,
   };
 }

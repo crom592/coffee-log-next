@@ -4,10 +4,12 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+function getUserId(request: NextRequest): string {
+  const segments = request.nextUrl.pathname.split('/');
+  return segments[segments.length - 2] || ''; // Get userId from /api/users/[userId]/follow
+}
+
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
 
@@ -15,40 +17,45 @@ export async function POST(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    if (session.user.id === params.userId) {
+    const followerId = session.user.id;
+    const followingId = getUserId(request);
+
+    if (!followerId || !followingId) {
+      return new NextResponse("Invalid request", { status: 400 });
+    }
+
+    if (followerId === followingId) {
       return new NextResponse("Cannot follow yourself", { status: 400 });
     }
 
     const existingFollow = await prisma.follow.findUnique({
       where: {
         followerId_followingId: {
-          followerId: session.user.id,
-          followingId: params.userId,
+          followerId,
+          followingId,
         },
       },
     });
 
     if (existingFollow) {
-      await prisma.follow.delete({
-        where: {
-          id: existingFollow.id,
-        },
-      });
-      return new NextResponse(null, { status: 204 });
+      return new NextResponse("Already following", { status: 400 });
     }
 
     const follow = await prisma.follow.create({
       data: {
-        followerId: session.user.id,
-        followingId: params.userId,
+        followerId,
+        followingId,
+      },
+      include: {
+        following: true,
       },
     });
 
     // Create notification
     await createNotification({
+      userId: followingId,
       type: "FOLLOW",
-      userId: params.userId,
-      actorId: session.user.id,
+      actorId: followerId,
     });
 
     return NextResponse.json(follow);
@@ -58,10 +65,7 @@ export async function POST(
   }
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
 
@@ -69,11 +73,18 @@ export async function GET(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const followerId = session.user.id;
+    const followingId = getUserId(request);
+
+    if (!followerId || !followingId) {
+      return new NextResponse("Invalid request", { status: 400 });
+    }
+
     const follow = await prisma.follow.findUnique({
       where: {
         followerId_followingId: {
-          followerId: session.user.id,
-          followingId: params.userId,
+          followerId,
+          followingId,
         },
       },
     });

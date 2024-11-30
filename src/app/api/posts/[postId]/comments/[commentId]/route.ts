@@ -3,10 +3,15 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { postId: string; commentId: string } }
-) {
+function getIds(request: NextRequest): { postId: string; commentId: string } {
+  const segments = request.nextUrl.pathname.split('/');
+  return {
+    postId: segments[segments.length - 3] || '', // Get postId from /api/posts/[postId]/comments/[commentId]
+    commentId: segments[segments.length - 1] || '', // Get commentId from /api/posts/[postId]/comments/[commentId]
+  };
+}
+
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
 
@@ -14,9 +19,10 @@ export async function PATCH(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const { commentId } = getIds(request);
     const comment = await prisma.comment.findUnique({
       where: {
-        id: params.commentId,
+        id: commentId,
       },
     });
 
@@ -29,14 +35,12 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { content } = body;
-
     const updatedComment = await prisma.comment.update({
       where: {
-        id: params.commentId,
+        id: commentId,
       },
       data: {
-        content,
+        content: body.content,
       },
       include: {
         user: {
@@ -56,10 +60,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { postId: string; commentId: string } }
-) {
+export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
 
@@ -67,9 +68,10 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const { commentId } = getIds(request);
     const comment = await prisma.comment.findUnique({
       where: {
-        id: params.commentId,
+        id: commentId,
       },
     });
 
@@ -83,7 +85,7 @@ export async function DELETE(
 
     await prisma.comment.delete({
       where: {
-        id: params.commentId,
+        id: commentId,
       },
     });
 

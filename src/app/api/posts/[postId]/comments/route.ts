@@ -2,21 +2,30 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createNotification } from "@/lib/notifications";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
-) {
+function getPostId(request: NextRequest): string {
+  const segments = request.nextUrl.pathname.split('/');
+  return segments[segments.length - 2] || ''; // Get postId from /api/posts/[postId]/comments
+}
+
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const postId = getPostId(request);
+    if (!postId) {
+      return new NextResponse("Post ID is required", { status: 400 });
+    }
     const body = await request.json();
 
     const post = await prisma.post.findUnique({
-      where: { id: params.postId },
+      where: {
+        id: postId,
+      },
     });
 
     if (!post) {
@@ -26,16 +35,8 @@ export async function POST(
     const comment = await prisma.comment.create({
       data: {
         content: body.content,
-        user: {
-          connect: {
-            id: session.user.id as string
-          }
-        },
-        post: {
-          connect: {
-            id: params.postId
-          }
-        }
+        userId: session.user.id,
+        postId,
       },
       include: {
         user: {
@@ -48,38 +49,38 @@ export async function POST(
       },
     });
 
+    // Create notification
     if (post.userId !== session.user.id) {
-      await prisma.notification.create({
-        data: {
-          type: "COMMENT",
-          userId: post.userId,
-          actorId: session.user.id as string,
-          postId: params.postId,
-        }
+      await createNotification({
+        userId: post.userId,
+        type: "COMMENT",
+        actorId: session.user.id,
+        postId,
       });
     }
 
     return NextResponse.json(comment);
   } catch (error) {
-    console.error(error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    console.error("[COMMENT_POST]", error);
+    return new NextResponse("Internal error", { status: 500 });
   }
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
-) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    const postId = getPostId(request);
+    if (!postId) {
+      return new NextResponse("Post ID is required", { status: 400 });
+    }
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") ?? "1");
-    const limit = parseInt(searchParams.get("limit") ?? "20");
+    const limit = parseInt(searchParams.get("limit") ?? "10");
     const skip = (page - 1) * limit;
 
     const [comments, total] = await Promise.all([
       prisma.comment.findMany({
         where: {
-          postId: params.postId,
+          postId,
         },
         include: {
           user: {
@@ -91,14 +92,14 @@ export async function GET(
           },
         },
         orderBy: {
-          createdAt: "desc",
+          createdAt: "asc",
         },
-        skip,
         take: limit,
+        skip,
       }),
       prisma.comment.count({
         where: {
-          postId: params.postId,
+          postId,
         },
       }),
     ]);
@@ -106,10 +107,11 @@ export async function GET(
     return NextResponse.json({
       comments,
       total,
-      hasMore: skip + comments.length < total,
+      page,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error(error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    console.error("[COMMENTS_GET]", error);
+    return new NextResponse("Internal error", { status: 500 });
   }
 }

@@ -1,20 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+function getUserId(request: NextRequest): string {
+  const segments = request.nextUrl.pathname.split('/');
+  return segments[segments.length - 2] || ''; // Get userId from /api/users/[userId]/posts
+}
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") ?? "1");
     const limit = parseInt(searchParams.get("limit") ?? "10");
     const skip = (page - 1) * limit;
 
+    const userId = getUserId(request);
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
         where: {
-          userId: params.userId,
+          userId,
         },
         include: {
           user: {
@@ -24,41 +27,23 @@ export async function GET(
               image: true,
             },
           },
-          log: {
-            select: {
-              id: true,
-              bean: {
-                select: {
-                  id: true,
-                  name: true,
-                  roaster: true,
-                },
-              },
-              method: {
-                select: {
-                  id: true,
-                  name: true,
-                },
-              },
-              rating: true,
-            },
-          },
           _count: {
             select: {
               comments: true,
               likes: true,
+              bookmarks: true,
             },
           },
         },
         orderBy: {
           createdAt: "desc",
         },
-        skip,
         take: limit,
+        skip,
       }),
       prisma.post.count({
         where: {
-          userId: params.userId,
+          userId,
         },
       }),
     ]);
@@ -66,10 +51,11 @@ export async function GET(
     return NextResponse.json({
       posts,
       total,
-      hasMore: skip + posts.length < total,
+      page,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error("[USER_POSTS_GET]", error);
+    console.error("[POSTS_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

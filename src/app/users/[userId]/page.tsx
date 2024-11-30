@@ -1,21 +1,17 @@
-import { Metadata } from "next";
+import { Metadata, PageProps } from "next";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { UserProfile } from "@/components/users/UserProfile";
 
-interface UserPageProps {
-  params: {
-    userId: string;
-  };
-}
-
 export async function generateMetadata({
   params,
-}: UserPageProps): Promise<Metadata> {
+}: PageProps): Promise<Metadata> {
+  const userId = params.userId as string;
+
   const user = await prisma.user.findUnique({
-    where: { id: params.userId },
+    where: { id: userId },
   });
 
   if (!user) {
@@ -30,10 +26,14 @@ export async function generateMetadata({
   };
 }
 
-export default async function UserPage({ params }: UserPageProps) {
+export default async function UserPage({
+  params,
+  searchParams,
+}: PageProps) {
+  const userId = params.userId as string;
   const session = await getServerSession(authOptions);
   const user = await prisma.user.findUnique({
-    where: { id: params.userId },
+    where: { id: userId },
     include: {
       _count: {
         select: {
@@ -50,9 +50,19 @@ export default async function UserPage({ params }: UserPageProps) {
     notFound();
   }
 
+  const currentUser = session?.user ? {
+    id: session.user.id || '', 
+    name: session.user.name ?? null, 
+    email: session.user.email ?? null, 
+    emailVerified: null,
+    image: session.user.image ?? null, 
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } : null;
+
   return (
     <div className="container max-w-4xl py-8">
-      <UserProfile user={user} currentUser={session?.user} />
+      <UserProfile user={user} currentUser={currentUser} />
     </div>
   );
 }

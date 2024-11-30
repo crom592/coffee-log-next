@@ -1,10 +1,14 @@
 import Link from "next/link"
 import { format } from "date-fns"
-import { Coffee } from "@prisma/client"
+import { Log, Bean } from "@prisma/client"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 
+type LogWithBean = Log & {
+  bean: Bean;
+}
+
 interface LogCardProps {
-  log: Coffee
+  log: LogWithBean
 }
 
 export function LogCard({ log }: LogCardProps) {
@@ -13,7 +17,7 @@ export function LogCard({ log }: LogCardProps) {
       <Card className="hover:bg-accent">
         <CardHeader className="p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">{log.name}</h3>
+            <h3 className="text-lg font-semibold">{log.bean.name}</h3>
             <span className="text-sm text-muted-foreground">
               {format(new Date(log.createdAt), "MMM d, yyyy")}
             </span>
@@ -22,16 +26,16 @@ export function LogCard({ log }: LogCardProps) {
         <CardContent className="p-4 pt-0">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Roaster</span>
-              <span className="text-sm">{log.roaster}</span>
+              <span className="text-sm text-muted-foreground">Grind Size</span>
+              <span className="text-sm">{log.grindSize}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Origin</span>
-              <span className="text-sm">{log.origin}</span>
+              <span className="text-sm text-muted-foreground">Temperature</span>
+              <span className="text-sm">{log.temperature}°C</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Process</span>
-              <span className="text-sm">{log.process}</span>
+              <span className="text-sm text-muted-foreground">Ratio</span>
+              <span className="text-sm">{log.ratio}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Rating</span>

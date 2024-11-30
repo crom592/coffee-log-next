@@ -16,10 +16,16 @@ export default async function BookmarksPage() {
     redirect("/auth/signin");
   }
 
+  const userId = session?.user?.id ?? "";
+
+  if (!userId) {
+    return <div>Invalid user ID</div>;
+  }
+
   return (
     <div className="container max-w-4xl py-8">
       <h1 className="text-2xl font-bold mb-6">북마크</h1>
-      <BookmarksList userId={session.user.id} />
+      <BookmarksList userId={userId} />
     </div>
   );
 }

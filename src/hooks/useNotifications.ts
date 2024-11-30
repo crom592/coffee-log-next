@@ -1,4 +1,4 @@
-import useSWR from "swr";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
 
 export interface Notification {
@@ -22,27 +22,37 @@ export interface Notification {
 }
 
 export function useNotifications() {
-  const { data, error, mutate } = useSWR<Notification[]>(
-    "/api/notifications",
-    fetcher
-  );
+  const queryClient = useQueryClient();
+  const queryKey = ["notifications"];
 
-  const markAllAsRead = async () => {
-    try {
-      await fetch("/api/notifications", {
+  const { data, error, isLoading } = useQuery<Notification[]>({
+    queryKey,
+    queryFn: () => fetcher("/api/notifications"),
+  });
+
+  const markAllAsReadMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/notifications", {
         method: "PATCH",
       });
-      mutate();
-    } catch (error) {
+      if (!response.ok) throw new Error("Failed to mark notifications as read");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (error) => {
       console.error("Error marking notifications as read:", error);
-    }
+    },
+  });
+
+  const markAllAsRead = async () => {
+    return markAllAsReadMutation.mutateAsync();
   };
 
   return {
     notifications: data,
-    isLoading: !error && !data,
+    isLoading,
     isError: error,
     markAllAsRead,
-    mutate,
   };
 }

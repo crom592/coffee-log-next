@@ -1,91 +1,115 @@
-import { useSWR } from 'swr';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export function useLike(postId: string) {
-  const { data, error, mutate } = useSWR<{ liked: boolean }>(
-    `/api/posts/${postId}/like`
-  );
+  const queryClient = useQueryClient();
+  const queryKey = ["like", postId];
 
-  const toggleLike = async () => {
-    try {
+  const { data, isLoading, error } = useQuery<{ liked: boolean }>({
+    queryKey,
+    queryFn: async () => {
+      const response = await fetch(`/api/posts/${postId}/like`);
+      if (!response.ok) throw new Error("Failed to fetch like status");
+      return response.json();
+    }
+  });
+
+  const { mutateAsync: toggleLike } = useMutation({
+    mutationFn: async () => {
       const response = await fetch(`/api/posts/${postId}/like`, {
         method: "POST",
       });
-
       if (!response.ok) throw new Error("Failed to toggle like");
-
-      mutate();
       return response.status === 200;
-    } catch (error) {
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (error) => {
       console.error("Error toggling like:", error);
       toast.error("좋아요 처리에 실패했습니다");
-      throw error;
     }
-  };
+  });
 
   return {
     liked: data?.liked ?? false,
-    isLoading: !error && !data,
+    isLoading,
     error,
     toggleLike,
   };
 }
 
 export function useBookmark(postId: string) {
-  const { data, error, mutate } = useSWR<{ bookmarked: boolean }>(
-    `/api/posts/${postId}/bookmark`
-  );
+  const queryClient = useQueryClient();
+  const queryKey = ["bookmark", postId];
 
-  const toggleBookmark = async () => {
-    try {
+  const { data, isLoading, error } = useQuery<{ bookmarked: boolean }>({
+    queryKey,
+    queryFn: async () => {
+      const response = await fetch(`/api/posts/${postId}/bookmark`);
+      if (!response.ok) throw new Error("Failed to fetch bookmark status");
+      return response.json();
+    }
+  });
+
+  const { mutateAsync: toggleBookmark } = useMutation({
+    mutationFn: async () => {
       const response = await fetch(`/api/posts/${postId}/bookmark`, {
         method: "POST",
       });
-
       if (!response.ok) throw new Error("Failed to toggle bookmark");
-
-      mutate();
       return response.status === 200;
-    } catch (error) {
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (error) => {
       console.error("Error toggling bookmark:", error);
       toast.error("북마크 처리에 실패했습니다");
-      throw error;
     }
-  };
+  });
 
   return {
     bookmarked: data?.bookmarked ?? false,
-    isLoading: !error && !data,
+    isLoading,
     error,
     toggleBookmark,
   };
 }
 
 export function useFollow(userId: string) {
-  const { data, error, mutate } = useSWR<{ following: boolean }>(
-    `/api/users/${userId}/follow`
-  );
+  const queryClient = useQueryClient();
+  const queryKey = ["follow", userId];
 
-  const toggleFollow = async () => {
-    try {
+  const { data, isLoading, error } = useQuery<{ following: boolean }>({
+    queryKey,
+    queryFn: async () => {
+      const response = await fetch(`/api/users/${userId}/follow`);
+      if (!response.ok) throw new Error("Failed to fetch follow status");
+      return response.json();
+    }
+  });
+
+  const { mutateAsync: toggleFollow } = useMutation({
+    mutationFn: async () => {
       const response = await fetch(`/api/users/${userId}/follow`, {
         method: "POST",
       });
-
       if (!response.ok) throw new Error("Failed to toggle follow");
-
-      mutate();
       return response.status === 200;
-    } catch (error) {
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (error) => {
       console.error("Error toggling follow:", error);
       toast.error("팔로우 처리에 실패했습니다");
-      throw error;
     }
-  };
+  });
 
   return {
     following: data?.following ?? false,
-    isLoading: !error && !data,
+    isLoading,
     error,
     toggleFollow,
   };

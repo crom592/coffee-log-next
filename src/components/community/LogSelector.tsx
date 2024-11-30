@@ -1,5 +1,5 @@
 import { useState } from "react";
-import useSWR from "swr";
+import { useQuery } from "@tanstack/react-query";
 import { Log } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +24,15 @@ interface LogSelectorProps {
 
 export function LogSelector({ onSelect, selectedLogId }: LogSelectorProps) {
   const [open, setOpen] = useState(false);
-  const { data: logs } = useSWR<(Log & { bean: { name: string }; method: { name: string } })[]>("/api/logs");
+  
+  const { data: logs } = useQuery<(Log & { bean: { name: string }; method: { name: string } })[]>({
+    queryKey: ["logs"],
+    queryFn: async () => {
+      const response = await fetch("/api/logs");
+      if (!response.ok) throw new Error("Failed to fetch logs");
+      return response.json();
+    },
+  });
 
   if (!logs) return null;
 
@@ -52,8 +60,8 @@ export function LogSelector({ onSelect, selectedLogId }: LogSelectorProps) {
               <CommandItem
                 key={log.id}
                 value={log.id}
-                onSelect={() => {
-                  onSelect(log.id === selectedLogId ? null : log.id);
+                onSelect={(currentValue) => {
+                  onSelect(currentValue === selectedLogId ? null : currentValue);
                   setOpen(false);
                 }}
               >
