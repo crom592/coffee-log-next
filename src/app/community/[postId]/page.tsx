@@ -47,7 +47,6 @@ export async function generateMetadata({
 
 export default async function PostPage({
   params,
-  searchParams,
 }: PageProps) {
   const postId = params.postId as string;
 
@@ -90,10 +89,11 @@ export default async function PostPage({
 
   const handleEdit = async (title: string, content: string, logId: string | null) => {
     try {
-      await updatePost(title, content, logId);
+      await updatePost({ title, content, logId });
       setIsEditing(false);
       toast.success("게시글이 수정되었습니다");
     } catch (error) {
+      console.error(error);
       toast.error("게시글 수정에 실패했습니다");
     }
   };
@@ -106,6 +106,7 @@ export default async function PostPage({
       router.push("/community");
       toast.success("게시글이 삭제되었습니다");
     } catch (error) {
+      console.error(error);
       toast.error("게시글 삭제에 실패했습니다");
     }
   };

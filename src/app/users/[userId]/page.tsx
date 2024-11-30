@@ -28,7 +28,6 @@ export async function generateMetadata({
 
 export default async function UserPage({
   params,
-  searchParams,
 }: PageProps) {
   const userId = params.userId as string;
   const session = await getServerSession(authOptions);

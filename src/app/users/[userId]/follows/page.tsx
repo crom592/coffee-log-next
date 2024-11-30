@@ -26,7 +26,6 @@ export async function generateMetadata({
 
 export default async function FollowsPage({
   params,
-  searchParams,
 }: PageProps) {
   const userId = params.userId as string;
 

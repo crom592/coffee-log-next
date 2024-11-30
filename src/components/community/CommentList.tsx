@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { useSession } from "next-auth/react";
-import { CommentWithUser } from "@/types/community";
 import { useComments } from "@/hooks/useComments";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
