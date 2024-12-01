@@ -2,15 +2,12 @@ import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
 
 export default withAuth(
-  function middleware() {
+  function middleware(req) {
     return NextResponse.next()
   },
   {
     callbacks: {
       authorized: ({ token }) => !!token
-    },
-    pages: {
-      signIn: "/auth/signin"
     }
   }
 )
@@ -18,6 +15,7 @@ export default withAuth(
 export const config = {
   matcher: [
     "/logs/:path*",
-    "/profile/:path*"
+    "/profile/:path*",
+    "/api/logs/:path*"
   ]
 }

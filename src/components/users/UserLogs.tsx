@@ -29,7 +29,7 @@ export function UserLogs({ userId }: UserLogsProps) {
   if (isEmpty) {
     return (
       <div className="text-center p-8 text-muted-foreground">
-        아직 작성한 커피 로그가 없습니다.
+        No coffee logs yet
       </div>
     );
   }

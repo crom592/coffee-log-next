@@ -3,9 +3,9 @@
 {% block content %}
 <div class="dashboard-container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-loose);">
-        <h1 style="font-size: 1.5rem; color: var(--primary); margin: 0;">나의 커피 로그</h1>
+        <h1 style="font-size: 1.5rem; color: var(--primary); margin: 0;">My Coffee Logs</h1>
         <a href="{{ url_for('add_log') }}" class="button" style="text-decoration: none;">
-            새 로그 작성
+            Write a new log
         </a>
     </div>
 
@@ -17,7 +17,7 @@
                 <div>
                     <h3 style="margin: 0 0 var(--spacing-tight) 0; color: var(--text);">{{ log.coffee_name }}</h3>
                     <p style="margin: 0; color: var(--text-subdued); font-size: 0.875rem;">
-                        {{ log.created_at.strftime('%Y년 %m월 %d일') }}
+                        {{ log.created_at.strftime('%Y-%m-%d') }}
                     </p>
                 </div>
                 <span class="rating" style="background: var(--primary); color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem;">
@@ -27,16 +27,16 @@
 
             <div style="margin-bottom: var(--spacing-base);">
                 <div style="display: grid; grid-template-columns: auto 1fr; gap: var(--spacing-tight) var(--spacing-base); margin-bottom: var(--spacing-base);">
-                    <span style="color: var(--text-subdued);">원산지:</span>
+                    <span style="color: var(--text-subdued);">Origin:</span>
                     <span>{{ log.origin }}</span>
                     
-                    <span style="color: var(--text-subdued);">로스팅:</span>
+                    <span style="color: var(--text-subdued);">Roast:</span>
                     <span>{{ log.roast_level }}</span>
                     
-                    <span style="color: var(--text-subdued);">그라인딩:</span>
+                    <span style="color: var(--text-subdued);">Grind:</span>
                     <span>{{ log.grind_size }}</span>
                     
-                    <span style="color: var(--text-subdued);">추출 방법:</span>
+                    <span style="color: var(--text-subdued);">Brew Method:</span>
                     <span>{{ log.brew_method }}</span>
                 </div>
             </div>
@@ -52,10 +52,10 @@
     {% else %}
     <div class="card" style="text-align: center; padding: var(--spacing-extra-loose);">
         <div style="color: var(--text-subdued); margin-bottom: var(--spacing-base);">
-            아직 작성된 커피 로그가 없습니다
+            No coffee logs yet
         </div>
         <a href="{{ url_for('add_log') }}" class="button" style="text-decoration: none; display: inline-block;">
-            첫 로그 작성하기
+            Write your first log
         </a>
     </div>
     {% endif %}

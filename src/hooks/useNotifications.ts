@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
+import { logWithTimestamp, errorWithTimestamp } from '@/utils/logger';
 
 export interface Notification {
   id: string;

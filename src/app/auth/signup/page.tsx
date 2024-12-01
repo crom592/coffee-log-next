@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { logWithTimestamp, errorWithTimestamp } from '@/utils/logger';
 
 export default function SignUp() {
   const [formData, setFormData] = useState({

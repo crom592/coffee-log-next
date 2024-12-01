@@ -2,7 +2,6 @@
 
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { Coffee, BookOpen, Scale, History, Droplet } from 'lucide-react'
 
 export function HomeClientPage() {
   const { data: session } = useSession()

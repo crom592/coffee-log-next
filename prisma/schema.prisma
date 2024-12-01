@@ -12,19 +12,19 @@ datasource db {
 }
 
 model Account {
-  id                       String  @id @default(cuid())
-  userId                   String
-  type                     String
-  provider                 String
-  providerAccountId        String
-  refresh_token            String? @db.Text
+  id                Int      @id @default(autoincrement())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?  @db.Text
   refresh_token_expires_in Int?
-  access_token            String? @db.Text
-  expires_at              Int?
-  token_type             String?
-  scope                  String?
-  id_token               String? @db.Text
-  session_state          String?
+  access_token      String?  @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -102,22 +102,53 @@ model BrewMethod {
 }
 
 model Log {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  beanId      String
-  bean        Bean     @relation(fields: [beanId], references: [id])
-  methodId    String
-  method      BrewMethod @relation(fields: [methodId], references: [id])
-  grindSize   Int
-  temperature Int
-  ratio       String
-  time        Int
-  notes       String?  @db.Text
-  rating      Int
-  posts       Post[]
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  beanId        String
+  bean          Bean     @relation(fields: [beanId], references: [id])
+  methodId      String
+  method        BrewMethod @relation(fields: [methodId], references: [id])
+  
+  // Bean details
+  beanOrigin      String?
+  beanRegion      String?
+  beanFarm        String?
+  beanAltitude    String?
+  beanProcess     String?
+  beanVariety     String?
+  beanRoastLevel  String?
+  beanRoastDate   DateTime?
+  beanDescription String?   @db.Text
+  
+  // Grinder settings
+  grinderType   String?    // Grinder model (e.g., "EK43", "Comandante")
+  grindSize     Int       // Grinder-specific scale number
+  
+  // Brewing parameters
+  temperature   Decimal   @db.Decimal(4,1)  // Celsius, e.g., 92.5
+  doseIn        Decimal   @db.Decimal(4,1)  // Coffee dose in grams
+  doseOut       Decimal   @db.Decimal(4,1)  // Water/yield in grams/ml
+  ratio         Decimal   @db.Decimal(4,2)  // Calculated ratio (e.g., 16.67 for 1:16.67)
+  timeSeconds   Int       // Total seconds (e.g., 150 for 2:30)
+  
+  // Results
+  tds          Decimal?  @db.Decimal(4,2)  // Total Dissolved Solids %
+  extractionYield Decimal?  @db.Decimal(4,2)  // Extraction yield %
+  
+  // Equipment
+  waterType    String?   // Type of water used
+  filterType   String?   // Filter paper type
+  
+  // Notes
+  notes        String?   @db.Text
+  improvements String?   @db.Text
+  rating       Int       @default(0)
+  
+  // Relations
+  posts        Post[]
 
   @@index([userId])
   @@index([beanId])

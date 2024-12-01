@@ -3,70 +3,71 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import KakaoProvider from "next-auth/providers/kakao"
 import GoogleProvider from "next-auth/providers/google"
 import { prisma } from "@/lib/prisma"
-
-if (!process.env.KAKAO_CLIENT_ID || !process.env.KAKAO_CLIENT_SECRET) {
-  throw new Error("Missing Kakao OAuth credentials")
-}
-
-if (!process.env.NEXTAUTH_SECRET) {
-  throw new Error("Missing NEXTAUTH_SECRET environment variable")
-}
-
-const providers = []
-
-providers.push(
-  KakaoProvider({
-    clientId: process.env.KAKAO_CLIENT_ID,
-    clientSecret: process.env.KAKAO_CLIENT_SECRET,
-    authorization: {
-      params: {
-        scope: "profile_nickname profile_image"
-      }
-    }
-  })
-)
-
-// Add Google provider only if credentials are available
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-  providers.push(
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    })
-  )
-}
+import { logWithTimestamp } from '@/utils/logger';
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
-  providers,
+  providers: [
+    KakaoProvider({
+      clientId: process.env.KAKAO_CLIENT_ID || '',
+      clientSecret: process.env.KAKAO_CLIENT_SECRET || '',
+      authorization: {
+        params: {
+          scope: "profile_nickname profile_image"
+        }
+      }
+    }),
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [
+          GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          }),
+        ]
+      : []),
+  ],
   session: {
-    strategy: "database",
+    strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET,
-  pages: {
-    signIn: "/auth/signin",
-    signOut: "/auth/signout",
-    error: "/auth/error",
-  },
   callbacks: {
-    async session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id
+    async jwt({ token, user, account }) {
+      logWithTimestamp(`JWT Callback - Token: ${JSON.stringify(token)}, User: ${JSON.stringify(user)}, Account: ${JSON.stringify(account)}`);
+      if (account) {
+        token.accessToken = account.access_token
       }
-      return session
+      if (user) {
+        token.id = user.id
+      } else if (!token.id) {
+        // Attempt to retrieve user ID from the token's subject
+        token.id = token.sub;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      logWithTimestamp(`Session Callback - Session: ${JSON.stringify(session)}, Token: ${JSON.stringify(token)}`);
+      if (session.user) {
+        session.user.id = token.id as string
+      }
+      session.accessToken = token.accessToken;
+      return session;
     },
     async redirect({ url, baseUrl }) {
       if (url.includes('/auth/error')) {
         return `${baseUrl}/auth/signin?error=AuthError`
       }
-      if (url.startsWith('/auth/signin')) {
-        return url
-      }
-      return '/auth/success'
-    }
+      if (url.startsWith(baseUrl)) return url
+      else if (url.startsWith("/")) return new URL(url, baseUrl).toString()
+      return baseUrl
+    },
   },
-  debug: true, // Enable debug logs
+  pages: {
+    signIn: '/auth/signin',
+    signOut: "/auth/signout",
+    error: "/auth/error",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
 }
 
 declare module 'next-auth' {
@@ -83,5 +84,6 @@ declare module 'next-auth' {
   interface JWT {
     accessToken?: string
     sub?: string
+    id?: string
   }
 }

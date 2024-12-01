@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { LogSelector } from "./LogSelector";
 import { toast } from "sonner";
+import { logWithTimestamp, errorWithTimestamp } from '@/utils/logger';
 
 interface PostFormProps {
   onSubmit: (title: string, content: string, logId: string | null) => Promise<void>;
@@ -78,7 +79,7 @@ export function PostForm({ onSubmit, defaultValues, submitLabel = "Post" }: Post
             />
           </div>
           <div className="space-y-2">
-            <Label>커피 로그 연결</Label>
+            <Label>Link Coffee Log</Label>
             <LogSelector onSelect={setLogId} selectedLogId={logId} />
           </div>
         </CardContent>

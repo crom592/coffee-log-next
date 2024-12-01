@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { logWithTimestamp, errorWithTimestamp } from '@/utils/logger';
 
 export function useLike(postId: string) {
   const queryClient = useQueryClient();

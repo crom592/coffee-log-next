@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
+import { logWithTimestamp, errorWithTimestamp } from '@/utils/logger';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -43,7 +44,7 @@ export async function GET() {
 
     return NextResponse.json(notifications);
   } catch (error) {
-    console.error("Error fetching notifications:", error);
+    errorWithTimestamp("Error fetching notifications:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
@@ -66,9 +67,10 @@ export async function PATCH() {
       },
     });
 
+    logWithTimestamp("Notifications marked as read successfully");
     return new NextResponse("Success", { status: 200 });
   } catch (error) {
-    console.error("Error marking notifications as read:", error);
+    errorWithTimestamp("Error marking notifications as read:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

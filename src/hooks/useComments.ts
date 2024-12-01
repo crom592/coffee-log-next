@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CommentWithUser, PaginatedResponse } from "@/types/community";
+import { logWithTimestamp, errorWithTimestamp } from '@/utils/logger';
 
 const COMMENTS_PER_PAGE = 20;
 

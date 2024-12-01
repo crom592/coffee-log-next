@@ -18,12 +18,12 @@ export default function CommunityPage() {
       <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">커뮤니티</h1>
+          <h1 className="text-3xl font-bold">Community</h1>
           {session && (
-            <Button asChild>
-              <Link href="/community/new">
+            <Button variant="default" className="bg-[#1B4332] hover:bg-[#143728] text-white">
+              <Link href="/community/new" className="flex items-center">
                 <PenSquare className="h-4 w-4 mr-2" />
-                새 글 작성
+                New Post
               </Link>
             </Button>
           )}
@@ -41,40 +41,42 @@ export default function CommunityPage() {
           </div>
         ) : (
           <Card className="p-8 text-center">
-            <h2 className="text-xl font-semibold mb-2">아직 게시글이 없습니다</h2>
+            <h2 className="text-xl font-semibold mb-2">No posts yet</h2>
             <p className="text-muted-foreground mb-4">
-              첫 번째 게시글을 작성해보세요!
+              Why not write the first post?
             </p>
             {session ? (
-              <Button asChild>
-                <Link href="/community/new">
+              <Button variant="default" className="bg-[#1B4332] hover:bg-[#143728] text-white">
+                <Link href="/community/new" className="flex items-center">
                   <PenSquare className="h-4 w-4 mr-2" />
-                  새 글 작성
+                  New Post
                 </Link>
               </Button>
             ) : (
-              <Button asChild>
-                <Link href="/auth/signin">로그인하고 시작하기</Link>
+              <Button variant="default" className="bg-[#1B4332] hover:bg-[#143728] text-white">
+                <Link href="/auth/signin">Sign in to get started</Link>
               </Button>
             )}
           </Card>
         )}
 
         {totalPages > 1 && (
-          <div className="flex justify-center mt-8 space-x-2">
+          <div className="flex justify-center gap-4 mt-8">
             <Button
               variant="outline"
               onClick={() => setPage(currentPage - 1)}
               disabled={currentPage === 1}
+              className="border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white"
             >
-              이전
+              Previous
             </Button>
             <Button
               variant="outline"
               onClick={() => setPage(currentPage + 1)}
               disabled={currentPage === totalPages}
+              className="border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white"
             >
-              다음
+              Next
             </Button>
           </div>
         )}

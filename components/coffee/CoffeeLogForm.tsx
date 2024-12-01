@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { logWithTimestamp, errorWithTimestamp } from '@/utils/logger';
 
 const roastLevels = ['Light', 'Medium-Light', 'Medium', 'Medium-Dark', 'Dark'];
 const brewingMethods = ['Pour Over', 'French Press', 'Espresso', 'AeroPress', 'Cold Brew'];

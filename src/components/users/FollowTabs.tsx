@@ -46,7 +46,7 @@ export function FollowTabs({
           isLoadingMore={isLoadingMoreFollowers}
           hasMore={hasMoreFollowers}
           onLoadMore={loadMoreFollowers}
-          emptyMessage="아직 팔로워가 없습니다"
+          emptyMessage="No followers yet"
         />
       </TabsContent>
       <TabsContent value="following">
@@ -56,7 +56,7 @@ export function FollowTabs({
           isLoadingMore={isLoadingMoreFollowing}
           hasMore={hasMoreFollowing}
           onLoadMore={loadMoreFollowing}
-          emptyMessage="아직 팔로우하는 사용자가 없습니다"
+          emptyMessage="Not following anyone yet"
         />
       </TabsContent>
     </Tabs>

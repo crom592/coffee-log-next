@@ -1,25 +1,22 @@
-'use server'
+'use server';
 
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import LogList from '@/components/logs/LogList';
 import { redirect } from 'next/navigation';
+import BeanList from '@/components/beans/BeanList';
+import Link from 'next/link';
 
-export default async function LogsPage() {
+export default async function BeansPage() {
   const session = await getServerSession(authOptions);
   
   if (!session?.user?.id) {
     redirect('/api/auth/signin');
   }
 
-  const logs = await prisma.log.findMany({
+  const beans = await prisma.bean.findMany({
     where: {
       userId: session.user.id
-    },
-    include: {
-      bean: true,
-      method: true,
     },
     orderBy: {
       createdAt: 'desc'
@@ -29,9 +26,15 @@ export default async function LogsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">My Brewing Logs</h1>
+        <h1 className="text-3xl font-bold">My Coffee Beans</h1>
+        <Link
+          href="/beans/new"
+          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+        >
+          Add New Bean
+        </Link>
       </div>
-      <LogList logs={logs} />
+      <BeanList beans={beans} />
     </div>
   );
 }

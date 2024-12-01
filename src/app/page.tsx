@@ -3,12 +3,14 @@
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Coffee, BookOpen, Scale, History, Droplet } from 'lucide-react'
+import Header from '@/components/Header'
 
 export default function Home() {
   const { data: session } = useSession()
 
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
+      <Header />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-16">
           <h1 className="text-5xl font-serif text-[#1B4332] mb-6">

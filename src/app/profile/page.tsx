@@ -1,96 +1,116 @@
-'use client'
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 
-import { useSession } from 'next-auth/react'
-import Image from 'next/image'
-import { Coffee, User } from 'lucide-react'
-import Link from 'next/link'
-
-export default function ProfilePage() {
-  const { data: session } = useSession()
-
-  if (!session) {
-    return (
-      <div className="min-h-screen bg-[#FAF7F2] p-6">
-        <div className="max-w-2xl mx-auto text-center">
-          <h1 className="text-3xl font-serif text-[#1B4332] mb-4">Please Sign In</h1>
-          <p className="text-[#1B4332]/80 mb-6">You need to be signed in to view your profile.</p>
-          <Link
-            href="/auth/signin"
-            className="inline-flex items-center gap-2 bg-[#1B4332] text-white px-6 py-3 rounded-lg hover:bg-[#143728] transition-colors"
-          >
-            Sign In
-          </Link>
-        </div>
-      </div>
-    )
+export default async function ProfilePage() {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    redirect('/api/auth/signin');
   }
 
-  return (
-    <div className="min-h-screen bg-[#FAF7F2] p-6">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-[#E9E5E0] rounded-2xl p-8 shadow-lg">
-          <div className="flex items-center gap-6 mb-8">
-            {session.user?.image ? (
-              <Image
-                src={session.user.image}
-                alt={session.user.name || 'User'}
-                width={96}
-                height={96}
-                className="rounded-full"
-              />
-            ) : (
-              <div className="w-24 h-24 bg-[#1B4332] rounded-full flex items-center justify-center">
-                <User className="w-12 h-12 text-white" />
-              </div>
-            )}
-            <div>
-              <h1 className="text-3xl font-serif text-[#1B4332] mb-2">{session.user?.name}</h1>
-              {session.user?.email && (
-                <p className="text-[#1B4332]/80">{session.user.email}</p>
-              )}
-            </div>
-          </div>
+  const [beans, methods, recentLogs] = await Promise.all([
+    prisma.bean.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: 'desc' }
+    }),
+    prisma.brewMethod.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: 'desc' }
+    }),
+    prisma.log.findMany({
+      where: { userId: session.user.id },
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        bean: true,
+        method: true
+      }
+    })
+  ]);
 
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-serif text-[#1B4332] mb-4 flex items-center gap-2">
-                <Coffee className="w-6 h-6" />
-                Coffee Activity
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Link
-                  href="/logs/history"
-                  className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow"
-                >
-                  <h3 className="font-medium text-[#1B4332] mb-1">Brewing History</h3>
-                  <p className="text-sm text-[#1B4332]/80">View your coffee brewing logs</p>
-                </Link>
-                <Link
-                  href="/logs/beans"
-                  className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow"
-                >
-                  <h3 className="font-medium text-[#1B4332] mb-1">Coffee Beans</h3>
-                  <p className="text-sm text-[#1B4332]/80">Browse your coffee collection</p>
-                </Link>
-                <Link
-                  href="/logs/brewing"
-                  className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow"
-                >
-                  <h3 className="font-medium text-[#1B4332] mb-1">Brewing Methods</h3>
-                  <p className="text-sm text-[#1B4332]/80">Your brewing recipes</p>
-                </Link>
-                <Link
-                  href="/logs/new"
-                  className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow"
-                >
-                  <h3 className="font-medium text-[#1B4332] mb-1">New Entry</h3>
-                  <p className="text-sm text-[#1B4332]/80">Log a new coffee brewing session</p>
-                </Link>
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* Profile Header */}
+      <div className="flex items-center gap-6 mb-12">
+        {session.user.image && (
+          <Image
+            src={session.user.image}
+            alt={session.user.name || 'Profile'}
+            width={80}
+            height={80}
+            className="rounded-full"
+          />
+        )}
+        <div>
+          <h1 className="text-3xl font-bold">{session.user.name}</h1>
+          <p className="text-gray-600">{session.user.email}</p>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <Link
+          href="/logs/new"
+          className="bg-green-600 text-white rounded-lg p-6 hover:bg-green-700 transition-colors"
+        >
+          <h2 className="text-xl font-semibold mb-2">New Entry</h2>
+          <p className="text-green-100">Log your latest brew</p>
+        </Link>
+        
+        <Link
+          href="/logs"
+          className="bg-green-100 rounded-lg p-6 hover:bg-green-200 transition-colors"
+        >
+          <h2 className="text-xl font-semibold mb-2">Brewing History</h2>
+          <p className="text-green-800">View all your logs</p>
+        </Link>
+        
+        <Link
+          href="/beans"
+          className="bg-green-100 rounded-lg p-6 hover:bg-green-200 transition-colors"
+        >
+          <h2 className="text-xl font-semibold mb-2">Coffee Beans</h2>
+          <p className="text-green-800">{beans.length} beans registered</p>
+        </Link>
+        
+        <Link
+          href="/methods"
+          className="bg-green-100 rounded-lg p-6 hover:bg-green-200 transition-colors"
+        >
+          <h2 className="text-xl font-semibold mb-2">Brewing Methods</h2>
+          <p className="text-green-800">{methods.length} methods available</p>
+        </Link>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold mb-6">Recent Brews</h2>
+        <div className="grid gap-4">
+          {recentLogs.map((log) => (
+            <Link
+              key={log.id}
+              href={`/logs/${log.id}`}
+              className="bg-white rounded-lg p-4 shadow hover:shadow-md transition-shadow"
+            >
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="font-semibold">{log.bean.name}</h3>
+                  <p className="text-gray-600 text-sm">{log.method.name}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-gray-600">
+                    {new Date(log.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
               </div>
-            </div>
-          </div>
+            </Link>
+          ))}
         </div>
       </div>
     </div>
-  )
+  );
 }

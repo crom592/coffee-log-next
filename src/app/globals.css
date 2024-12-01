@@ -12,6 +12,83 @@ body {
   background: rgb(var(--background));
 }
 
+/* Header styles */
+.app-header {
+  @apply bg-white shadow-sm;
+}
+
+.nav-container {
+  @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between;
+}
+
+.logo-link {
+  @apply flex items-center gap-2 text-[#1B4332] hover:opacity-80 transition-opacity;
+}
+
+.logo {
+  @apply flex items-center gap-2;
+}
+
+.logo-image {
+  @apply w-8 h-8;
+}
+
+.logo-text {
+  @apply text-xl font-serif;
+}
+
+.nav-links {
+  @apply flex items-center gap-6;
+}
+
+.nav-item {
+  @apply text-[#1B4332]/80 hover:text-[#1B4332] transition-colors;
+}
+
+.nav-item.active {
+  @apply text-[#1B4332] font-medium;
+}
+
+.user-menu-container {
+  @apply relative;
+}
+
+.user-menu-button {
+  @apply flex items-center gap-2 hover:opacity-80 transition-opacity;
+}
+
+.user-avatar-container {
+  @apply relative w-8 h-8 rounded-full overflow-hidden;
+}
+
+.user-avatar {
+  @apply object-cover;
+}
+
+.user-name {
+  @apply text-sm font-medium text-[#1B4332];
+}
+
+.user-dropdown {
+  @apply absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50;
+}
+
+.dropdown-header {
+  @apply px-4 py-2 border-b border-gray-100;
+}
+
+.dropdown-user-name {
+  @apply block text-sm font-medium text-[#1B4332];
+}
+
+.dropdown-user-email {
+  @apply block text-xs text-[#1B4332]/60 mt-0.5;
+}
+
+.dropdown-item {
+  @apply block w-full text-left px-4 py-2 text-sm text-[#1B4332]/80 hover:bg-[#1B4332]/5 transition-colors;
+}
+
 /* Form elements */
 input,
 textarea {

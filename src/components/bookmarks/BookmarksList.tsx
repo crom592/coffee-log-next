@@ -31,7 +31,7 @@ export function BookmarksList({ userId }: BookmarksListProps) {
   if (isEmpty) {
     return (
       <div className="text-center p-8 text-muted-foreground">
-        아직 북마크한 게시글이 없습니다.
+        No bookmarked posts yet
       </div>
     );
   }

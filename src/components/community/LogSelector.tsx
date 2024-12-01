@@ -46,15 +46,15 @@ export function LogSelector({ onSelect, selectedLogId }: LogSelectorProps) {
           className="w-full justify-between"
         >
           {selectedLogId
-            ? logs.find((log) => log.id === selectedLogId)?.bean.name || "커피 로그 선택"
-            : "커피 로그 선택"}
+            ? logs.find((log) => log.id === selectedLogId)?.bean.name || "Select Coffee Log"
+            : "Select Coffee Log"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
         <Command>
-          <CommandInput placeholder="커피 로그 검색..." />
-          <CommandEmpty>찾을 수 없습니다.</CommandEmpty>
+          <CommandInput placeholder="Search coffee logs..." />
+          <CommandEmpty>No logs found.</CommandEmpty>
           <CommandGroup className="max-h-60 overflow-auto">
             {logs.map((log) => (
               <CommandItem

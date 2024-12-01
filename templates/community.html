@@ -128,7 +128,7 @@
 {% block content %}
 <div class="container">
     <div style="margin-bottom: var(--spacing-extra-loose); display: flex; justify-content: space-between; align-items: center;">
-        <h1 style="font-size: 1.5rem; font-weight: 600; color: var(--text);">커피 커뮤니티</h1>
+        <h1 style="font-size: 1.5rem; font-weight: 600; color: var(--text);">Coffee Community</h1>
         <div style="display: flex; align-items: center; gap: var(--spacing-base);">
             <div class="view-toggle">
                 <button onclick="setView('grid')" 
@@ -153,7 +153,7 @@
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 20 20">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 3v14m7-7H3"/>
                 </svg>
-                새 글 작성
+                Create a new post
             </a>
             {% endif %}
         </div>
@@ -166,7 +166,7 @@
             <a href="{{ url_for('view_post', post_id=post.id) }}" style="text-decoration: none;">
                 {% if post.coffee_log %}
                 <div class="coffee-log-badge">
-                    연결된 커피 로그: {{ post.coffee_log.coffee_name }}
+                    Connected coffee log: {{ post.coffee_log.coffee_name }}
                 </div>
                 {% endif %}
                 <div class="post-content">
@@ -193,16 +193,16 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                       d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
             </svg>
-            <p class="empty-state-title">아직 게시글이 없습니다</p>
+            <p class="empty-state-title">No posts yet</p>
             {% if current_user.is_authenticated %}
-            <p class="empty-state-text">첫 번째 게시글을 작성해보세요!</p>
+            <p class="empty-state-text">Create your first post!</p>
             <a href="{{ url_for('create_post') }}" class="button">
-                첫 게시글 작성하기
+                Create your first post
             </a>
             {% else %}
             <p class="empty-state-text">
-                <a href="{{ url_for('login') }}" style="color: var(--primary); text-decoration: none;">로그인</a>하고
-                첫 번째 게시글을 작성해보세요!
+                <a href="{{ url_for('login') }}" style="color: var(--primary); text-decoration: none;">Log in</a> and
+                create your first post!
             </p>
             {% endif %}
         </div>
@@ -233,7 +233,7 @@
                             </div>
                             {% if post.coffee_log %}
                             <div style="display: inline-block; background: #e3f1df; color: var(--success); padding: var(--spacing-tight) var(--spacing-base); border-radius: 9999px; font-size: 0.875rem;">
-                                연결된 커피 로그: {{ post.coffee_log.coffee_name }}
+                                Connected coffee log: {{ post.coffee_log.coffee_name }}
                             </div>
                             {% endif %}
                             <p class="post-text" style="-webkit-line-clamp: initial;">{{ post.content }}</p>
@@ -249,16 +249,16 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                       d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
             </svg>
-            <p class="empty-state-title">아직 게시글이 없습니다</p>
+            <p class="empty-state-title">No posts yet</p>
             {% if current_user.is_authenticated %}
-            <p class="empty-state-text">첫 번째 게시글을 작성해보세요!</p>
+            <p class="empty-state-text">Create your first post!</p>
             <a href="{{ url_for('create_post') }}" class="button">
-                첫 게시글 작성하기
+                Create your first post
             </a>
             {% else %}
             <p class="empty-state-text">
-                <a href="{{ url_for('login') }}" style="color: var(--primary); text-decoration: none;">로그인</a>하고
-                첫 번째 게시글을 작성해보세요!
+                <a href="{{ url_for('login') }}" style="color: var(--primary); text-decoration: none;">Log in</a> and
+                create your first post!
             </p>
             {% endif %}
         </div>
