@@ -37,8 +37,20 @@ export default function NewPostPage() {
     <div>
       <Header />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">새 글 작성</h1>
-        <PostForm onSubmit={handleSubmit} />
+        <h1 className="text-3xl font-bold mb-8">New Post</h1>
+        <PostForm 
+          onSubmit={handleSubmit} 
+          renderButton={(isSubmitting) => (
+            <Button
+              type="submit"
+              variant="default"
+              className="bg-[#1B4332] hover:bg-[#143728] text-white"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Posting..." : "Post"}
+            </Button>
+          )}
+        />
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-function getLogId(request: NextRequest): string {
+function getId(request: NextRequest): string {
   return request.nextUrl.pathname.split('/').pop() || '';
 }
 
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const id = getLogId(request);
+    const id = getId(request);
     const log = await prisma.log.findUnique({
       where: {
         id,
@@ -53,7 +53,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const id = getLogId(request);
+    const id = getId(request);
     const body = await request.json();
     const { beanId, methodId, grindSize, temperature, ratio, time, notes, rating } = body;
 
@@ -88,7 +88,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const id = getLogId(request);
+    const id = getId(request);
     await prisma.log.delete({
       where: {
         id,

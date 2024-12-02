@@ -1,12 +1,15 @@
+'use server'
+
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { LogPageClient } from './LogPageClient';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import Header from '@/components/Header';
 
 export default async function LogPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user?.id) {
     notFound();
   }
@@ -14,6 +17,7 @@ export default async function LogPage({ params }: { params: { id: string } }) {
   const log = await prisma.log.findUnique({
     where: {
       id: params.id,
+      userId: session.user.id,
     },
     include: {
       bean: true,
@@ -25,7 +29,7 @@ export default async function LogPage({ params }: { params: { id: string } }) {
     notFound();
   }
 
-  // Convert Decimal types to numbers
+  // Convert Decimal types to numbers for client components
   const sanitizedLog = {
     ...log,
     temperature: log.temperature ? Number(log.temperature) : null,
@@ -34,13 +38,14 @@ export default async function LogPage({ params }: { params: { id: string } }) {
     ratio: log.ratio ? Number(log.ratio) : null,
     tds: log.tds ? Number(log.tds) : null,
     extractionYield: log.extractionYield ? Number(log.extractionYield) : null,
-    method: {
-      ...log.method,
-      defaultDose: log.method.defaultDose ? Number(log.method.defaultDose) : null,
-      defaultRatio: log.method.defaultRatio ? Number(log.method.defaultRatio) : null,
-      defaultTemp: log.method.defaultTemp ? Number(log.method.defaultTemp) : null,
-    }
   };
 
-  return <LogPageClient log={sanitizedLog} />;
+  return (
+    <>
+      <Header />
+      <main className="min-h-screen bg-[#FAF7F2]">
+        <LogPageClient log={sanitizedLog} />
+      </main>
+    </>
+  );
 }

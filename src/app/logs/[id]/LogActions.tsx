@@ -27,7 +27,7 @@ interface LogActionsProps {
   logId: string;
 }
 
-export function LogActions({ logId }: LogActionsProps) {
+export default function LogActions({ logId }: LogActionsProps) {
   const router = useRouter();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -43,12 +43,12 @@ export function LogActions({ logId }: LogActionsProps) {
         throw new Error('Failed to delete log');
       }
 
-      toast.success('로그가 삭제되었습니다');
+      toast.success('Log deleted successfully');
       router.push('/logs/history');
       router.refresh();
     } catch (error) {
       console.error('Error deleting log:', error);
-      toast.error('로그 삭제에 실패했습니다');
+      toast.error('Failed to delete log');
     } finally {
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);
@@ -61,7 +61,7 @@ export function LogActions({ logId }: LogActionsProps) {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">더 보기</span>
+            <span className="sr-only">More</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -70,7 +70,7 @@ export function LogActions({ logId }: LogActionsProps) {
             className="cursor-pointer"
           >
             <Pencil className="mr-2 h-4 w-4" />
-            수정하기
+            Edit
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -78,7 +78,7 @@ export function LogActions({ logId }: LogActionsProps) {
             className="cursor-pointer text-destructive focus:text-destructive"
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            삭제하기
+            Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -86,19 +86,19 @@ export function LogActions({ logId }: LogActionsProps) {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>정말 이 로그를 삭제하시겠습니까?</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure you want to delete this log?</AlertDialogTitle>
             <AlertDialogDescription>
-              이 작업은 되돌릴 수 없습니다. 로그가 영구적으로 삭제됩니다.
+              This action cannot be undone. The log will be permanently deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>취소</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
               className="bg-destructive hover:bg-destructive/90"
             >
-              {isDeleting ? '삭제 중...' : '삭제하기'}
+              {isDeleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

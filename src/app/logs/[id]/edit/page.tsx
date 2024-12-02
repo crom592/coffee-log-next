@@ -1,14 +1,13 @@
-import { prisma } from '@/lib/prisma';
-import { notFound } from 'next/navigation';
+'use server'
+
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { notFound } from 'next/navigation';
 import { EditLogForm } from './EditLogForm';
+import Header from '@/components/Header';
 
-export default async function EditLogPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function EditLogPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -18,6 +17,7 @@ export default async function EditLogPage({
   const log = await prisma.log.findUnique({
     where: {
       id: params.id,
+      userId: session.user.id,
     },
     include: {
       bean: true,
@@ -29,12 +29,19 @@ export default async function EditLogPage({
     notFound();
   }
 
-  // Check if the log belongs to the user
-  if (log.userId !== session.user.id) {
-    notFound();
-  }
+  const beans = await prisma.bean.findMany({
+    where: {
+      userId: session.user.id,
+    },
+  });
 
-  // Convert Decimal types to numbers
+  const methods = await prisma.brewMethod.findMany({
+    where: {
+      userId: session.user.id,
+    },
+  });
+
+  // Convert Decimal types to numbers for client components
   const sanitizedLog = {
     ...log,
     temperature: log.temperature ? Number(log.temperature) : null,
@@ -43,20 +50,17 @@ export default async function EditLogPage({
     ratio: log.ratio ? Number(log.ratio) : null,
     tds: log.tds ? Number(log.tds) : null,
     extractionYield: log.extractionYield ? Number(log.extractionYield) : null,
-    method: {
-      ...log.method,
-      defaultDose: log.method.defaultDose ? Number(log.method.defaultDose) : null,
-      defaultRatio: log.method.defaultRatio ? Number(log.method.defaultRatio) : null,
-      defaultTemp: log.method.defaultTemp ? Number(log.method.defaultTemp) : null,
-    },
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] py-8">
-      <div className="max-w-2xl mx-auto px-4">
-        <h1 className="text-2xl font-serif text-[#1B4332] mb-6">로그 수정하기</h1>
-        <EditLogForm log={sanitizedLog} />
-      </div>
-    </div>
+    <>
+      <Header />
+      <main className="min-h-screen bg-[#FAF7F2]">
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-3xl font-serif text-[#1B4332] mb-8">Edit Log</h1>
+          <EditLogForm log={sanitizedLog} beans={beans} methods={methods} />
+        </div>
+      </main>
+    </>
   );
 }

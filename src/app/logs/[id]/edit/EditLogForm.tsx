@@ -75,12 +75,12 @@ export function EditLogForm({ log }: EditLogFormProps) {
         throw new Error('Failed to update log');
       }
 
-      toast.success('로그가 수정되었습니다');
+      toast.success('Log updated successfully');
       router.push(`/logs/${log.id}`);
       router.refresh();
     } catch (error) {
       console.error('Error updating log:', error);
-      toast.error('로그 수정에 실패했습니다');
+      toast.error('Failed to update log');
     }
   };
 
@@ -93,13 +93,14 @@ export function EditLogForm({ log }: EditLogFormProps) {
             name="temperature"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>온도 (°C)</FormLabel>
+                <FormLabel>Temperature (°C)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     step="0.1"
                     placeholder="93.5"
                     {...field}
+                    value={field.value ?? ''}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value ? Number(e.target.value) : null
@@ -117,12 +118,13 @@ export function EditLogForm({ log }: EditLogFormProps) {
             name="timeSeconds"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>시간 (초)</FormLabel>
+                <FormLabel>Time (seconds)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     placeholder="180"
                     {...field}
+                    value={field.value ?? ''}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value ? Number(e.target.value) : null
@@ -140,13 +142,14 @@ export function EditLogForm({ log }: EditLogFormProps) {
             name="doseIn"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>투입량 (g)</FormLabel>
+                <FormLabel>Dose (g)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     step="0.1"
                     placeholder="18"
                     {...field}
+                    value={field.value ?? ''}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value ? Number(e.target.value) : null
@@ -164,13 +167,14 @@ export function EditLogForm({ log }: EditLogFormProps) {
             name="doseOut"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>추출량 (g)</FormLabel>
+                <FormLabel>Yield (g)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     step="0.1"
                     placeholder="36"
                     {...field}
+                    value={field.value ?? ''}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value ? Number(e.target.value) : null
@@ -188,13 +192,14 @@ export function EditLogForm({ log }: EditLogFormProps) {
             name="ratio"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>비율 (1:n)</FormLabel>
+                <FormLabel>Ratio (1:n)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     step="0.1"
                     placeholder="2"
                     {...field}
+                    value={field.value ?? ''}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value ? Number(e.target.value) : null
@@ -212,7 +217,7 @@ export function EditLogForm({ log }: EditLogFormProps) {
             name="rating"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>평점 (1-5)</FormLabel>
+                <FormLabel>Rating (1-5)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -220,6 +225,7 @@ export function EditLogForm({ log }: EditLogFormProps) {
                     max="5"
                     placeholder="5"
                     {...field}
+                    value={field.value ?? ''}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value ? Number(e.target.value) : null
@@ -244,6 +250,7 @@ export function EditLogForm({ log }: EditLogFormProps) {
                     step="0.01"
                     placeholder="8.5"
                     {...field}
+                    value={field.value ?? ''}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value ? Number(e.target.value) : null
@@ -261,13 +268,14 @@ export function EditLogForm({ log }: EditLogFormProps) {
             name="extractionYield"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>추출 수율 (%)</FormLabel>
+                <FormLabel>Extraction Yield (%)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     step="0.1"
                     placeholder="20"
                     {...field}
+                    value={field.value ?? ''}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value ? Number(e.target.value) : null
@@ -286,10 +294,10 @@ export function EditLogForm({ log }: EditLogFormProps) {
           name="notes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>메모</FormLabel>
+              <FormLabel>Notes</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="맛, 향, 바디감 등을 기록해보세요"
+                  placeholder="Add your tasting notes or brewing observations..."
                   {...field}
                   value={field.value || ''}
                 />
@@ -304,10 +312,10 @@ export function EditLogForm({ log }: EditLogFormProps) {
           name="improvements"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>다음에 개선할 점</FormLabel>
+              <FormLabel>Improvements</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="다음 추출 시 개선하고 싶은 점을 기록해보세요"
+                  placeholder="Add your improvements for the next brew..."
                   {...field}
                   value={field.value || ''}
                 />
@@ -317,15 +325,15 @@ export function EditLogForm({ log }: EditLogFormProps) {
           )}
         />
 
-        <div className="flex justify-end gap-4">
+        <div className="flex justify-end gap-4 mt-6">
           <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
+            type="submit"
+            variant="default"
+            className="bg-[#1B4332] hover:bg-[#143728] text-white"
+            disabled={form.formState.isSubmitting}
           >
-            취소
+            {form.formState.isSubmitting ? "Saving..." : "Save"}
           </Button>
-          <Button type="submit">저장하기</Button>
         </div>
       </form>
     </Form>
