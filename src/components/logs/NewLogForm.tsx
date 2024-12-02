@@ -27,7 +27,7 @@ interface BeanData {
 }
 
 interface BrewingData {
-  grinderType: string;
+  grinderType: GrinderType;
   grindSize: number;
   temperature: number;
   doseIn: number;
@@ -110,6 +110,8 @@ const defaultMethods = [
 ];
 
 // Professional grinder presets with detailed specifications
+type GrinderType = keyof typeof GRINDER_PRESETS;
+
 const GRINDER_PRESETS = {
   'EK43': { 
     min: 1, 
@@ -197,8 +199,8 @@ export default function NewLogForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [beans, setBeans] = useState(defaultBeans);
   const [methods, setMethods] = useState(defaultMethods);
-  const [selectedBeanId, setSelectedBeanId] = useState(null);
-  const [selectedMethodId, setSelectedMethodId] = useState(null);
+  const [selectedBeanId, setSelectedBeanId] = useState<string | null>(null);
+  const [selectedMethodId, setSelectedMethodId] = useState<string | null>(null);
 
   const [beanData, setBeanData] = useState<BeanData>({
     name: '',
@@ -302,7 +304,7 @@ export default function NewLogForm() {
     }
   };
 
-  const handleGrinderChange = (grinderType: string) => {
+  const handleGrinderChange = (grinderType: GrinderType) => {
     const preset = GRINDER_PRESETS[grinderType];
     setBrewingData(prev => ({
       ...prev,
@@ -559,7 +561,7 @@ export default function NewLogForm() {
               <Label>Grinder Model</Label>
               <select
                 value={brewingData.grinderType}
-                onChange={(e) => handleGrinderChange(e.target.value)}
+                onChange={(e) => handleGrinderChange(e.target.value as GrinderType)}
                 className="w-full p-2 border rounded"
               >
                 {Object.keys(GRINDER_PRESETS).map(grinder => (

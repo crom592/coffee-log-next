@@ -39,6 +39,7 @@ export function useFollowers(userId: string) {
       if (!lastPage.hasMore) return undefined;
       return pages.length + 1;
     },
+    initialPageParam: 1,
   });
 
   const followers = data?.pages.flatMap((page) => page.followers ?? []) ?? [];
@@ -51,7 +52,7 @@ export function useFollowers(userId: string) {
     error,
     isEmpty,
     hasMore: hasNextPage,
-    isLoading: status === 'loading',
+    isLoading: status === 'pending',
     isLoadingMore: isFetchingNextPage,
     isRefreshing: isFetching && !isFetchingNextPage,
     loadMore: fetchNextPage,
@@ -80,6 +81,7 @@ export function useFollowing(userId: string) {
       if (!lastPage.hasMore) return undefined;
       return pages.length + 1;
     },
+    initialPageParam: 1,
   });
 
   const following = data?.pages.flatMap((page) => page.following ?? []) ?? [];
@@ -92,7 +94,7 @@ export function useFollowing(userId: string) {
     error,
     isEmpty,
     hasMore: hasNextPage,
-    isLoading: status === 'loading',
+    isLoading: status === 'pending',
     isLoadingMore: isFetchingNextPage,
     isRefreshing: isFetching && !isFetchingNextPage,
     loadMore: fetchNextPage,

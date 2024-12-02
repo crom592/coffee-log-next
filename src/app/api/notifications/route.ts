@@ -44,7 +44,7 @@ export async function GET() {
 
     return NextResponse.json(notifications);
   } catch (error) {
-    errorWithTimestamp("Error fetching notifications:", error);
+    errorWithTimestamp(`Error fetching notifications: ${error instanceof Error ? error.message : String(error)}`);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
@@ -70,7 +70,7 @@ export async function PATCH() {
     logWithTimestamp("Notifications marked as read successfully");
     return new NextResponse("Success", { status: 200 });
   } catch (error) {
-    errorWithTimestamp("Error marking notifications as read:", error);
+    errorWithTimestamp(`Error marking notifications as read: ${error instanceof Error ? error.message : String(error)}`);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

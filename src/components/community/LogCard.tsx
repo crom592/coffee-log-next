@@ -8,7 +8,7 @@ interface LogCardProps {
     bean: {
       name: string;
       roastLevel: string;
-      origin: string;
+      origin: string | null;
     };
     method: {
       name: string;
@@ -29,7 +29,7 @@ export function LogCard({ log }: LogCardProps) {
             <div>
               <h4 className="font-medium">{log.bean.name}</h4>
               <p className="text-sm text-muted-foreground">
-                {log.bean.origin} • {log.bean.roastLevel}
+                {log.bean.origin || '원산지 미상'} • {log.bean.roastLevel}
               </p>
             </div>
           </div>
@@ -37,15 +37,15 @@ export function LogCard({ log }: LogCardProps) {
           <div className="grid grid-cols-3 gap-4">
             <div className="flex items-center space-x-2">
               <Timer className="h-4 w-4" />
-              <span className="text-sm">{log.time}초</span>
+              <span className="text-sm">{log.timeSeconds}초</span>
             </div>
             <div className="flex items-center space-x-2">
               <ThermometerSun className="h-4 w-4" />
-              <span className="text-sm">{log.temperature}°C</span>
+              <span className="text-sm">{Number(log.temperature)}°C</span>
             </div>
             <div className="flex items-center space-x-2">
               <Scale className="h-4 w-4" />
-              <span className="text-sm">1:{log.ratio}</span>
+              <span className="text-sm">1:{Number(log.ratio)}</span>
             </div>
           </div>
 

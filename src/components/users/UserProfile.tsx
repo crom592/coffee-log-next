@@ -3,7 +3,7 @@ import { useFollow } from "@/hooks/useSocial";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Link } from "next/link";
+import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Coffee, MessageSquare, Users } from "lucide-react";
 import { UserPosts } from "@/components/users/UserPosts";

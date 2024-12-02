@@ -1,16 +1,19 @@
 // src/app/community/[postId]/page.tsx
 
 import { Metadata } from "next";
-import { prisma } from "@/lib/prisma"; // Prisma 클라이언트 임포트
-import PostPageClient from "./PostPageClient"; // 클라이언트 컴포넌트 임포트
+import { prisma } from "@/lib/prisma";
+import PostPageClient from "./PostPageClient";
+
+interface PageParams {
+  postId: string;
+}
 
 export async function generateMetadata({
   params,
 }: {
-  params: { postId: string };
+  params: Promise<PageParams>;
 }): Promise<Metadata> {
-  const postId = params.postId;
-
+  const { postId } = await params;
   const post = await prisma.post.findUnique({
     where: { id: postId },
     include: {
@@ -29,10 +32,22 @@ export async function generateMetadata({
   };
 }
 
-export default function PostPage({
+export default async function PostPage({
   params,
 }: {
-  params: { postId: string };
+  params: Promise<PageParams>;
 }) {
-  return <PostPageClient postId={params.postId} />;
+  const { postId } = await params;
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+    include: {
+      user: true,
+    },
+  });
+
+  if (!post) {
+    return <div>Post not found</div>;
+  }
+  
+  return <PostPageClient params={{ postId: post.id }} />;
 }

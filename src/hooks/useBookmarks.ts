@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, FetchNextPageOptions, InfiniteQueryObserverResult, InfiniteData } from "@tanstack/react-query";
 import { PostWithRelations } from "@/types/community";
 
 interface BookmarksResponse {
@@ -7,9 +7,21 @@ interface BookmarksResponse {
   hasMore: boolean;
 }
 
+interface UseBookmarksResult {
+  posts: PostWithRelations[];
+  total: number;
+  error: Error | null;
+  isEmpty: boolean;
+  hasMore: boolean;
+  isLoading: boolean;
+  isLoadingMore: boolean;
+  isRefreshing: boolean;
+  loadMore: (options?: FetchNextPageOptions) => Promise<InfiniteQueryObserverResult<InfiniteData<BookmarksResponse, unknown>, Error>>;
+}
+
 const PAGE_SIZE = 10;
 
-export function useBookmarks(userId: string) {
+export function useBookmarks(userId: string): UseBookmarksResult {
   const {
     data,
     error,
@@ -31,6 +43,7 @@ export function useBookmarks(userId: string) {
       if (!lastPage.hasMore) return undefined;
       return pages.length + 1;
     },
+    initialPageParam: 1,
   });
 
   const posts = data?.pages.flatMap((page) => page.posts) ?? [];
@@ -43,7 +56,7 @@ export function useBookmarks(userId: string) {
     error,
     isEmpty,
     hasMore: hasNextPage,
-    isLoading: status === "loading",
+    isLoading: status === "pending",
     isLoadingMore: isFetchingNextPage,
     isRefreshing: isFetching && !isFetchingNextPage,
     loadMore: fetchNextPage,

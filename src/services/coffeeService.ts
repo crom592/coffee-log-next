@@ -20,7 +20,7 @@ export const fetchMethods = async () => {
   }
 };
 
-export const createBean = async (name) => {
+export const createBean = async (name: string) => {
   try {
     const response = await axios.post('/api/beans', { name });
     return response.data;
@@ -30,7 +30,7 @@ export const createBean = async (name) => {
   }
 };
 
-export const createMethod = async (name) => {
+export const createMethod = async (name: string) => {
   try {
     const response = await axios.post('/api/methods', { name });
     return response.data;

@@ -1,14 +1,20 @@
-import { Metadata, PageProps } from "next";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { UserProfile } from "@/components/users/UserProfile";
 
+interface PageParams {
+  userId: string;
+}
+
 export async function generateMetadata({
   params,
-}: PageProps): Promise<Metadata> {
-  const userId = params.userId as string;
+}: {
+  params: Promise<PageParams>;
+}): Promise<Metadata> {
+  const { userId } = await params;
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -28,8 +34,10 @@ export async function generateMetadata({
 
 export default async function UserPage({
   params,
-}: PageProps) {
-  const userId = params.userId as string;
+}: {
+  params: Promise<PageParams>;
+}) {
+  const { userId } = await params;
   const session = await getServerSession(authOptions);
   const user = await prisma.user.findUnique({
     where: { id: userId },

@@ -1,39 +1,42 @@
-import { Metadata, PageProps } from "next";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { FollowTabs } from "@/components/users/FollowTabs";
 
+interface PageParams {
+  userId: string;
+}
+
 export async function generateMetadata({
   params,
-}: PageProps): Promise<Metadata> {
-  const userId = params.userId as string;
-
+}: {
+  params: Promise<PageParams>;
+}): Promise<Metadata> {
+  const { userId } = await params;
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
 
   if (!user) {
     return {
-      title: "User Not Found",
+      title: "User not found",
     };
   }
 
   return {
-    title: `${user.name}'s Followers & Following - Coffee Log`,
-    description: `View ${user.name}'s followers and following on Coffee Log`,
+    title: `${user.name}'s Follows - Coffee Log`,
   };
 }
 
 export default async function FollowsPage({
   params,
-}: PageProps) {
-  const userId = params.userId as string;
-
+}: {
+  params: Promise<PageParams>;
+}) {
+  const { userId } = await params;
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: {
-      id: true,
-      name: true,
+    include: {
       _count: {
         select: {
           followers: true,
@@ -48,10 +51,10 @@ export default async function FollowsPage({
   }
 
   return (
-    <div className="container max-w-2xl py-8">
-      <h1 className="text-2xl font-bold mb-6">{user.name}</h1>
-      <FollowTabs
-        userId={user.id}
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-8">{user.name}'s Network</h1>
+      <FollowTabs 
+        userId={userId}
         followerCount={user._count.followers}
         followingCount={user._count.following}
       />

@@ -46,10 +46,10 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       logWithTimestamp(`Session Callback - Session: ${JSON.stringify(session)}, Token: ${JSON.stringify(token)}`);
-      if (session.user) {
+      if (token) {
         session.user.id = token.id as string
       }
-      session.accessToken = token.accessToken;
+      session.accessToken = token.accessToken as string;
       return session;
     },
     async redirect({ url, baseUrl }) {

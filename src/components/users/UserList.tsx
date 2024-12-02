@@ -9,9 +9,9 @@ import { Loader2 } from "lucide-react";
 
 interface User {
   id: string;
-  name: string | null;
-  image: string | null;
-  _count: {
+  name?: string | null;
+  image?: string | null;
+  _count?: {
     followers: number;
     following: number;
   };
@@ -79,7 +79,11 @@ export function UserList({
 
 interface UserCardProps {
   user: User;
-  currentUser: User | null | undefined;
+  currentUser?: {
+    id?: string;
+    name?: string | null;
+    image?: string | null;
+  } | null;
 }
 
 function UserCard({ user, currentUser }: UserCardProps) {
@@ -101,7 +105,7 @@ function UserCard({ user, currentUser }: UserCardProps) {
             <p className="text-sm font-medium truncate">{user.name}</p>
             <div className="flex items-center space-x-2 text-xs text-muted-foreground">
               <Users className="h-3 w-3" />
-              <span>{user._count.followers} followers</span>
+              <span>{user._count?.followers ?? 0} followers</span>
             </div>
           </div>
         </Link>

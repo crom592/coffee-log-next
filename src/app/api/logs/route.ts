@@ -7,7 +7,7 @@ import { logWithTimestamp, errorWithTimestamp } from '@/utils/logger';
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    logWithTimestamp('POST /api/logs - Session:', session);
+    logWithTimestamp(`POST /api/logs - Session: ${JSON.stringify(session)}`);
     
     if (!session?.user?.id) {
       logWithTimestamp('Unauthorized - No session or user ID');
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    logWithTimestamp('Request payload:', data);
+    logWithTimestamp(`Request payload: ${JSON.stringify(data)}`);
     
     if (!data) {
       return NextResponse.json({ message: "Bad Request - Missing data" }, { status: 400 });
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       beanDescription: data.beanDescription || null
     };
 
-    logWithTimestamp('Cleaned data:', cleanData);
+    logWithTimestamp(`Cleaned data: ${JSON.stringify(cleanData)}`);
 
     // Validate required fields
     const requiredFields = {
@@ -101,34 +101,28 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    logWithTimestamp('Log created successfully:', log);
+    logWithTimestamp(`Log created successfully: ${JSON.stringify(log)}`);
     return NextResponse.json(log);
   } catch (error) {
-    errorWithTimestamp('API Error:', error);
+    errorWithTimestamp(`API Error: ${error instanceof Error ? error.message : String(error)}`);
     
     // Prisma error handling
-    if (error.code === 'P2002') {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'code' in error &&
+      error.code === 'P2002'
+    ) {
       return NextResponse.json({ 
         message: "A unique constraint would be violated.",
-        details: error.meta
+        details: 'meta' in error ? error.meta : undefined
       }, { status: 400 });
-    } else if (error.code === 'P2003') {
-      return NextResponse.json({ 
-        message: "Foreign key constraint failed.",
-        details: error.meta
-      }, { status: 400 });
-    } else if (error.code === 'P2025') {
-      return NextResponse.json({ 
-        message: "Record not found.",
-        details: error.meta
-      }, { status: 404 });
     }
 
-    // Generic error response
-    const message = error instanceof Error ? error.message : "Internal Server Error";
+    // Handle other errors
     return NextResponse.json({ 
-      message,
-      error: process.env.NODE_ENV === 'development' ? error : undefined
+      message: "Internal server error",
+      details: error instanceof Error ? error.message : "Unknown error"
     }, { status: 500 });
   }
 }
@@ -162,8 +156,25 @@ export async function GET() {
 
     return NextResponse.json(logs);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal Server Error";
-    errorWithTimestamp('API Error:', error);
-    return NextResponse.json({ message }, { status: 500 });
+    errorWithTimestamp(`API Error: ${error instanceof Error ? error.message : String(error)}`);
+    
+    // Prisma error handling
+    if (
+      error &&
+      typeof error === 'object' &&
+      'code' in error &&
+      error.code === 'P2002'
+    ) {
+      return NextResponse.json({ 
+        message: "A unique constraint would be violated.",
+        details: 'meta' in error ? error.meta : undefined
+      }, { status: 400 });
+    }
+
+    // Handle other errors
+    return NextResponse.json({ 
+      message: "Internal server error",
+      details: error instanceof Error ? error.message : "Unknown error"
+    }, { status: 500 });
   }
 }

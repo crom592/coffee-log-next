@@ -2,10 +2,7 @@ import Link from "next/link"
 import { format } from "date-fns"
 import { Log, Bean } from "@prisma/client"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-
-type LogWithBean = Log & {
-  bean: Bean;
-}
+import { LogWithBean } from "@/hooks/useUserContent"
 
 interface LogCardProps {
   log: LogWithBean
@@ -31,11 +28,11 @@ export function LogCard({ log }: LogCardProps) {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Temperature</span>
-              <span className="text-sm">{log.temperature}°C</span>
+              <span className="text-sm">{Number(log.temperature)}°C</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Ratio</span>
-              <span className="text-sm">{log.ratio}</span>
+              <span className="text-sm">1:{Number(log.ratio)}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Rating</span>

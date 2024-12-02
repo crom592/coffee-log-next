@@ -25,13 +25,15 @@ import Header from "@/components/Header";
 import { logWithTimestamp, errorWithTimestamp } from '@/utils/logger';
 
 interface PostPageClientProps {
-  postId: string;
+  params: {
+    postId: string;
+  }
 }
 
-export default function PostPageClient({ postId }: PostPageClientProps) {
+export default function PostPageClient({ params }: PostPageClientProps) {
   const router = useRouter();
   const { data: session } = useSession();
-  const { post, isLoading, updatePost, deletePost } = usePost(postId);
+  const { post, isLoading, updatePost, deletePost } = usePost(params.postId);
   const [isEditing, setIsEditing] = useState(false);
 
   // 기존의 클라이언트 로직을 여기에 포함합니다.
@@ -73,7 +75,7 @@ export default function PostPageClient({ postId }: PostPageClientProps) {
   // 게시글 수정 및 삭제 핸들러 정의
   const handleEdit = async (title: string, content: string, logId: string | null) => {
     try {
-      await updatePost({ title, content, logId });
+      await updatePost(title, content, logId);
       setIsEditing(false);
       toast.success("Post updated successfully");
     } catch (error) {

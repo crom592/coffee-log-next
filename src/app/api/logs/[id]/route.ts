@@ -67,7 +67,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
         grindSize,
         temperature,
         ratio,
-        time,
+        timeSeconds: time,
         notes,
         rating,
       },

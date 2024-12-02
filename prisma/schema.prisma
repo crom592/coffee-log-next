@@ -89,14 +89,17 @@ model Bean {
 }
 
 model BrewMethod {
-  id          String   @id @default(cuid())
-  name        String
-  description String?  @db.Text
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  logs        Log[]
+  id            String   @id @default(cuid())
+  name          String
+  description   String?  @db.Text
+  defaultDose   Decimal? @db.Decimal(4,1)
+  defaultRatio  Decimal? @db.Decimal(4,2)
+  defaultTemp   Decimal? @db.Decimal(4,1)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs          Log[]
 
   @@index([userId])
 }

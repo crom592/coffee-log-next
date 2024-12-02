@@ -14,7 +14,7 @@ export function FollowTabs({
   followingCount,
 }: FollowTabsProps) {
   const {
-    data: followers,
+    followers,
     hasMore: hasMoreFollowers,
     isLoadingMore: isLoadingMoreFollowers,
     isLoading: isLoadingFollowers,
@@ -22,7 +22,7 @@ export function FollowTabs({
   } = useFollowers(userId);
 
   const {
-    data: following,
+    following,
     hasMore: hasMoreFollowing,
     isLoadingMore: isLoadingMoreFollowing,
     isLoading: isLoadingFollowing,

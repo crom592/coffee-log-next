@@ -1,6 +1,6 @@
 import { useInfiniteQuery, UseInfiniteQueryResult } from '@tanstack/react-query';
 import { PostWithRelations } from "@/types/community";
-import { Log } from "@prisma/client";
+import { Log, Bean } from "@prisma/client";
 
 interface UserPostsResponse {
   posts: PostWithRelations[];
@@ -8,8 +8,12 @@ interface UserPostsResponse {
   hasMore: boolean;
 }
 
+export type LogWithBean = Log & {
+  bean: Bean;
+}
+
 interface UserLogsResponse {
-  logs: Log[];
+  logs: LogWithBean[];
   total: number;
   hasMore: boolean;
 }
@@ -38,6 +42,7 @@ export function useUserPosts(userId: string) {
       if (!lastPage.hasMore) return undefined;
       return pages.length + 1;
     },
+    initialPageParam: 1,
   });
 
   const posts = data?.pages.flatMap((page) => page.posts) ?? [];
@@ -50,7 +55,7 @@ export function useUserPosts(userId: string) {
     error,
     isEmpty,
     hasMore: hasNextPage,
-    isLoading: status === 'loading',
+    isLoading: status === 'pending',
     isLoadingMore: isFetchingNextPage,
     isRefreshing: isFetching && !isFetchingNextPage,
     loadMore: fetchNextPage,
@@ -79,6 +84,7 @@ export function useUserLogs(userId: string) {
       if (!lastPage.hasMore) return undefined;
       return pages.length + 1;
     },
+    initialPageParam: 1,
   });
 
   const logs = data?.pages.flatMap((page) => page.logs) ?? [];
@@ -91,7 +97,7 @@ export function useUserLogs(userId: string) {
     error,
     isEmpty,
     hasMore: hasNextPage,
-    isLoading: (status as UseInfiniteQueryResult<UserLogsResponse>['status']) === 'loading',
+    isLoading: status === 'pending',
     isLoadingMore: isFetchingNextPage,
     isRefreshing: isFetching && !isFetchingNextPage,
     loadMore: fetchNextPage,
