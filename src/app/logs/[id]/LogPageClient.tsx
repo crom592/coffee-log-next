@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { ArrowLeft, Coffee, ThermometerSun, Timer, Weight } from 'lucide-react';
 import Link from 'next/link';
+import LogActions from './LogActions'; // Import the LogActions component
 
 type LogWithDetails = Log & {
   bean: Bean;
@@ -33,9 +34,12 @@ export function LogPageClient({ log }: { log: LogWithDetails }) {
                 {format(new Date(log.createdAt), 'PPP', { locale: ko })}
               </p>
             </div>
-            <div className="flex items-center gap-1 text-[#1B4332]/60">
-              <Coffee className="w-4 h-4" />
-              <span className="text-sm">{log.method.name}</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 text-[#1B4332]/60">
+                <Coffee className="w-4 h-4" />
+                <span className="text-sm">{log.method.name}</span>
+              </div>
+              <LogActions logId={log.id} />
             </div>
           </div>
 
